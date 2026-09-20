@@ -1,0 +1,88 @@
+{
+  "itemCount": 2,
+  "pageCount": 1,
+  "items": [
+    {
+      "name": "cam",
+      "confName": "cam",
+      "ready": true,
+      "readyTime": "2026-09-19T16:41:44.65180426-04:00",
+      "available": true,
+      "availableTime": "2026-09-19T16:41:44.65180426-04:00",
+      "online": true,
+      "onlineTime": "2026-09-19T16:41:44.651807707-04:00",
+      "source": {
+        "type": "rtspSession",
+        "id": "9aa9dc40-8d6b-487d-b30a-688843e9e735"
+      },
+      "tracks": ["H264"],
+      "tracks2": [
+        {
+          "codec": "H264",
+          "codecProps": {
+            "width": 1920,
+            "height": 1080,
+            "profile": "Baseline",
+            "level": "4"
+          }
+        }
+      ],
+      "readers": [
+        {
+          "type": "webRTCSession",
+          "id": "29a4ec89-79fb-4e29-961b-de1b5e9ea723"
+        }
+      ],
+      "inboundBytes": 22171585,
+      "outboundBytes": 21528744,
+      "inboundFramesInError": 0,
+      "bytesReceived": 22171585,
+      "bytesSent": 21528744
+    },
+    {
+      "name": "cam1",
+      "confName": "cam1",
+      "ready": true,
+      "readyTime": "2026-09-19T16:41:45.703376759-04:00",
+      "available": true,
+      "availableTime": "2026-09-19T16:41:45.703376759-04:00",
+      "online": true,
+      "onlineTime": "2026-09-19T16:41:45.703379765-04:00",
+      "source": {
+        "type": "rtspSession",
+        "id": "70ca655f-8269-4943-b971-e890bcea7088"
+      },
+      "tracks": ["H264"],
+      "tracks2": [
+        {
+          "codec": "H264",
+          "codecProps": {
+            "width": 3840,
+            "height": 2160,
+            "profile": "Baseline",
+            "level": "5.1"
+          }
+        }
+      ],
+      "readers": [
+        {
+          "type": "webRTCSession",
+          "id": "09284a81-e1c6-4d37-be8b-2bcefb3210e0"
+        },
+        {
+          "type": "webRTCSession",
+          "id": "299e06d5-a525-481e-8467-7db2d5385759"
+        },
+        {
+          "type": "webRTCSession",
+          "id": "ac531078-aa9d-4275-9691-b34f83a85c98"
+        }
+      ],
+      "inboundBytes": 21375633,
+      "outboundBytes": 62629287,
+      "inboundFramesInError": 0,
+      "bytesReceived": 21375633,
+      "bytesSent": 62629287
+    }
+  ]
+}
