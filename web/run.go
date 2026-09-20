@@ -22,7 +22,7 @@ var page []byte
 var icon []byte
 
 var (
-	url = "192.168.10.188:9000"
+	url = "localhost:9000"
 )
 
 func Run() {
@@ -68,7 +68,7 @@ func serve(server *http.Server) {
 
 func GetPaths() (list *APIPathList, err error) {
 	list = &APIPathList{}
-	query := "http://192.168.10.188:9997/v3/paths/list"
+	query := "http://localhost:9997/v3/paths/list"
 	err = queryAndDecode(query, list)
 	if err != nil {
 		log.Printf("query current attempt: %v\n\terror: %v", 1, err)
