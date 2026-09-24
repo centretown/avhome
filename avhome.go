@@ -1,6 +1,8 @@
 package main
 
-import "avhome/web"
+import (
+	"avhome/web"
+)
 
 func main() {
 	web.Run()

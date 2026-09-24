@@ -1,10 +1,8 @@
 package web
 
 import (
-	_ "embed"
-	"encoding/json"
-	"fmt"
-	"io"
+	"embed"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -12,51 +10,102 @@ import (
 	"time"
 )
 
-//go:embed reader.js
-var script []byte
+//go:embed resources/*
+var content embed.FS
 
-//go:embed main.html
-var page []byte
+func listContent(fs embed.FS) {
+	entries, err := fs.ReadDir(".")
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, entry := range entries {
+		log.Print(entry.Name())
+	}
+}
 
-//go:embed favicon.ico
-var icon []byte
-
-var (
-	url = "localhost:9000"
-)
+type Runtime struct {
+	MtxUrl string
+	Paths  *MtxPathList
+}
 
 func Run() {
-	GetPaths()
-
-	mux := http.NewServeMux()
-	server := &http.Server{
-		Addr:    url,
-		Handler: mux,
-	}
+	listContent(content)
+	// return
+	var (
+		err     error
+		runtime = &Runtime{
+			MtxUrl: "10.0.0.7",
+		}
+		mux    = http.NewServeMux()
+		server = &http.Server{
+			Addr:    ":9000",
+			Handler: mux,
+		}
+	)
 	defer server.Close()
-	// mux.Handle("/reader.js", http.FileServer(http.FS(script)))
+
+	runtime.Paths, err = GetMtxPaths(runtime.MtxUrl, "dave", "football")
+	if err != nil {
+		log.Printf("failed to contact Mtx: %v\n", err)
+		return
+	}
+
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(content))))
+	t, err := template.ParseFS(content, "resources/html/*.html")
+	if err != nil {
+		log.Printf("failed to create html template: %v\n", err)
+		return
+	}
+
+	mainTmpl := t.Lookup("main")
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("%s\n", r.RequestURI)
-		w.Write(page)
+		log.Printf("root %s\n", r.RequestURI)
+		w.WriteHeader(http.StatusOK)
+		mainTmpl.Execute(w, runtime)
 	})
-	mux.HandleFunc("/reader.js", func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("%s\n", r.RequestURI)
+	mux.HandleFunc("/css/", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("css %s\n", r.RequestURI)
+		w.Header().Set("Content-Type", "text/css")
+		w.WriteHeader(http.StatusOK)
+		buf, _ := content.ReadFile("resources" + r.RequestURI)
+		w.Write(buf)
+	})
+	mux.HandleFunc("/js/", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("js %s\n", r.RequestURI)
 		w.Header().Set("Cache-Control", "max-age=3600")
 		w.Header().Set("Content-Type", "application/javascript")
 		w.WriteHeader(http.StatusOK)
-		w.Write(script)
+		buf, _ := content.ReadFile("resources" + r.RequestURI)
+		w.Write(buf)
+	})
+	mux.HandleFunc("/home.js", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("home %s\n", r.RequestURI)
+		w.Header().Set("Content-Type", "application/javascript")
+		w.WriteHeader(http.StatusOK)
+		buf, _ := content.ReadFile("resources/home.js")
+		w.Write(buf)
 	})
 	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		w.Write(icon)
+		buf, _ := content.ReadFile("resources/favicon.ico")
+		w.Write(buf)
 	})
 
 	go serve(server)
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, os.Interrupt)
-	sig := <-sigs
-	log.Printf("Signal: %v", sig)
+
+	for {
+		select {
+		case sig := <-sigs:
+			log.Printf("Signal: %v", sig)
+			return
+		default:
+			time.Sleep(time.Millisecond * 10)
+		}
+	}
+
 }
 
 func serve(server *http.Server) {
@@ -64,58 +113,4 @@ func serve(server *http.Server) {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func GetPaths() (list *APIPathList, err error) {
-	list = &APIPathList{}
-	query := "http://localhost:9997/v3/paths/list"
-	err = queryAndDecode(query, list)
-	if err != nil {
-		log.Printf("query current attempt: %v\n\terror: %v", 1, err)
-		return
-	}
-	log.Print(list.ItemCount)
-	for _, item := range list.Items {
-		log.Printf("name: %s, available: %v, source: %v, type: %v",
-			item.Name, item.Available, item.Source.ID, item.Source.Type)
-	}
-
-	return
-}
-
-func queryAndDecode(query string, w any) (err error) {
-	var resp *http.Response
-
-	for attempt := range 3 {
-		resp, err = http.Get(query)
-		if err != nil {
-			log.Printf("query current attempt: %v\n\terror: %v", attempt, err)
-			time.Sleep(time.Second)
-			continue
-		}
-
-		err = readAndDecode(resp.Body, w)
-		if err != nil {
-			log.Printf("decode current attempt: %v, error: %v", attempt, err)
-			time.Sleep(time.Second)
-			continue
-		}
-
-		return
-	}
-
-	return
-}
-
-func readAndDecode(r io.ReadCloser, w any) error {
-	defer r.Close()
-	buf, err := io.ReadAll(r)
-	if err != nil {
-		return fmt.Errorf("io.ReadAll: %v", err)
-	}
-	err = json.Unmarshal(buf, w)
-	if err != nil {
-		return fmt.Errorf("json.Unmarshal: %v\n%v", err, string(buf))
-	}
-	return nil
 }

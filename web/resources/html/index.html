@@ -1,0 +1,51 @@
+{{define "main"}}
+<!---->
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="stylesheet" href="css/w3.css" />
+        <link rel="stylesheet" href="css/home.css" />
+        <script src="js/htmx.js"></script>
+        <script src="js/ws.js"></script>
+        <script src="js/reader.js"></script>
+        <script src="home.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="list">{{template "camera.list" .}}</div>
+            <div class="">
+                <video
+                    id="video"
+                    class="content"
+                    controls
+                    muted
+                    autoplay
+                    playsinline
+                ></video>
+                <div id="message" class="message"></div>
+            </div>
+        </div>
+        <script>
+            let readers = [];
+            window.addEventListener("load", () => {
+              readers[0] = addReader("video", "cam1", "message");
+              readers[1] = addReader("video-cam1", "cam1", "message-cam1");
+              readers[2] = addReader("video-cam", "cam", "message-cam");
+              readers[3] = addReader("video-cam4", "cam4", "message-cam4");
+            });
+            window.addEventListener("beforeunload", () => {
+                console.log("closing readers...");
+                for (let reader of readers) {
+                    if (reader !== null) {
+                        console.log("closing: ", reader.url);
+                        reader.close();
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>
+{{end}}
+<!---->
