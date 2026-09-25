@@ -5,36 +5,31 @@
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width" />
-        <link rel="stylesheet" href="css/w3.css" />
-        <link rel="stylesheet" href="css/home.css" />
-        <script src="js/htmx.js"></script>
-        <script src="js/ws.js"></script>
-        <script src="js/reader.js"></script>
-        <script src="home.js"></script>
+        <link rel="stylesheet" href="/static/css/w3.css" />
+        <link rel="stylesheet" href="/static/css/home.css" />
+        <script src="/static/js/htmx.js"></script>
+        <script src="/static/js/ws.js"></script>
+        <script src="/static/js/reader.js"></script>
+        <script src="/static/home.js"></script>
     </head>
     <body>
-        <div class="container">
-            <div class="list">{{template "camera.list" .}}</div>
-            <div class="">
-                <video
-                    id="video"
-                    class="content"
-                    controls
-                    muted
-                    autoplay
-                    playsinline
-                ></video>
-                <div id="message" class="message"></div>
-            </div>
-        </div>
+        <div class="container">{{template "camera.list" .}}</div>
+        <div id="clock" class="clock"></div>
         <script>
+            const contentView = document.getElementById("camera-content");
+            const listView = document.getElementById("camera-list");
+            let windowWidth = window.innerWidth;
+            let windowHeight = window.innerHeight;
+            startClock();
+            reportWindowSize();
             let readers = [];
             window.addEventListener("load", () => {
-              readers[0] = addReader("video", "cam1", "message");
-              readers[1] = addReader("video-cam1", "cam1", "message-cam1");
-              readers[2] = addReader("video-cam", "cam", "message-cam");
-              readers[3] = addReader("video-cam4", "cam4", "message-cam4");
+                {{range $i, $c := .Paths.Items}}
+                readers[{{$i}}] =
+                  addReader("video-{{$c.Name}}", "{{$c.Name}}", "message-{{$c.Name}}");
+                {{end}}
             });
+
             window.addEventListener("beforeunload", () => {
                 console.log("closing readers...");
                 for (let reader of readers) {
@@ -44,6 +39,14 @@
                     }
                 }
             });
+
+            window.onresize = reportWindowSize;
+            function reportWindowSize() {
+              windowWidth = window.innerWidth*4/5;
+              windowHeight = window.innerHeight;
+              console.log(windowWidth, windowHeight);
+              console.log(contentView.clientWidth, contentView.clientHeight);
+            }
         </script>
     </body>
 </html>

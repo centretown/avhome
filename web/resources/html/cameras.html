@@ -1,22 +1,43 @@
 {{ define "camera.list" }}
 <!---->
-{{range $cam := .Paths.Items}} {{template "camera.video" $cam}} {{end}}
+<div id="camera-list" class="list">
+    {{range $i, $camera := .Paths.Items}}
+    <!---->
+    {{if (ne $i 1)}}
+    <div id="section-{{$camera.Name}}" class="list-item w3-round">
+        {{template "camera.video" $camera}}
+        <!---->
+    </div>
+    {{end}} {{end}}
+</div>
+{{$content:=index .Paths.Items 1}}
+<div id="camera-content" class="content">
+    <div id="section-{{$content.Name}}" class="">
+        {{template "camera.video" $content}}
+        <!---->
+    </div>
+</div>
 <!---->
 {{end}}
 <!---->
 
 {{ define "camera.video"}}
-<div class="">
-    <div class="w3-blue-gray w3-padding-small w3-round-small">Camera: {{.Name}}</div>
-    <video
-        id="video-{{.Name}}"
-        class="list"
-        controls
-        muted
-        autoplay
-        playsinline
-    ></video>
-    <div id="message-{{.Name}}" class="message"></div>
-</div>
+<div class="w3-blue-gray w3-padding-small w3-round">Camera: {{.Name}}</div>
+<video
+    id="video-{{.Name}}"
+    class="video"
+    controls
+    muted
+    autoplay
+    playsinline
+></video>
+<div id="message-{{.Name}}" class="message"></div>
+<button
+    class="action"
+    hx-on:click="swapContentVideo('section-{{.Name}}');"
+    hx-swap="none"
+>
+    <span class="symbols-form">background_replace</span>
+</button>
 {{end}}
 <!---->

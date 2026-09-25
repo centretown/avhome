@@ -7,11 +7,9 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 )
-
-//go:embed resources/*
-var content embed.FS
 
 func listContent(fs embed.FS) {
 	entries, err := fs.ReadDir(".")
@@ -28,9 +26,27 @@ type Runtime struct {
 	Paths  *MtxPathList
 }
 
+type filehander struct{}
+
+func (fs *filehander) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	path := r.URL.Path
+	w.Header().Add("Cache-Control", "no-cache")
+	buf, err := os.ReadFile("web/resources/" + path)
+	if err != nil {
+		log.Fatalf("failed to read: %v\n", err)
+	}
+	if strings.HasPrefix(path, "css") {
+		w.Header().Set("Content-Type", "text/css")
+	} else if strings.HasPrefix(path, "js") {
+		w.Header().Set("Content-Type", "application/javascript")
+	}
+	w.WriteHeader(http.StatusOK)
+	w.Write(buf)
+}
+
+var fs = &filehander{}
+
 func Run() {
-	listContent(content)
-	// return
 	var (
 		err     error
 		runtime = &Runtime{
@@ -50,44 +66,29 @@ func Run() {
 		return
 	}
 
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(content))))
-	t, err := template.ParseFS(content, "resources/html/*.html")
-	if err != nil {
-		log.Printf("failed to create html template: %v\n", err)
-		return
+	// fs := http.FileServer(http.Dir("web/resources/"))
+	var httpTemplate *template.Template
+	refreshTemplate := func() {
+		t, err := template.ParseGlob("web/resources/html/*.html")
+		if err != nil {
+			log.Printf("failed to create html template: %v\n", err)
+		}
+		httpTemplate = t
 	}
 
-	mainTmpl := t.Lookup("main")
+	mux.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
+		http.StripPrefix("/static/", fs).ServeHTTP(w, r)
+	})
+
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("root %s\n", r.RequestURI)
+		refreshTemplate()
+		mainTmpl := httpTemplate.Lookup("main")
 		w.WriteHeader(http.StatusOK)
 		mainTmpl.Execute(w, runtime)
 	})
-	mux.HandleFunc("/css/", func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("css %s\n", r.RequestURI)
-		w.Header().Set("Content-Type", "text/css")
-		w.WriteHeader(http.StatusOK)
-		buf, _ := content.ReadFile("resources" + r.RequestURI)
-		w.Write(buf)
-	})
-	mux.HandleFunc("/js/", func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("js %s\n", r.RequestURI)
-		w.Header().Set("Cache-Control", "max-age=3600")
-		w.Header().Set("Content-Type", "application/javascript")
-		w.WriteHeader(http.StatusOK)
-		buf, _ := content.ReadFile("resources" + r.RequestURI)
-		w.Write(buf)
-	})
-	mux.HandleFunc("/home.js", func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("home %s\n", r.RequestURI)
-		w.Header().Set("Content-Type", "application/javascript")
-		w.WriteHeader(http.StatusOK)
-		buf, _ := content.ReadFile("resources/home.js")
-		w.Write(buf)
-	})
 	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		buf, _ := content.ReadFile("resources/favicon.ico")
+		buf, _ := os.ReadFile("web/resources/favicon.ico")
 		w.Write(buf)
 	})
 
