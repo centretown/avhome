@@ -3,12 +3,12 @@
 }
 
 body {
-    --bgOpaque: rgba(0, 0, 0, 0.75);
-    --bgTransparent: rgba(0, 0, 0, 0.15);
+    --bgOpaque: rgba(0, 0, 0, 1);
+    --bgTransparent: rgba(0, 0, 0, 0);
     --bgH3: rgba(0, 127, 255, 0.15);
     --fgBright: rgba(165, 208, 198, 1);
     --fgSelected: rgba(200, 255, 240, 1);
-    --fgDim: rgba(165, 208, 198, 0.8);
+    --fgDim: rgba(165, 208, 198, 0.4);
     --fgOut: rgba(120, 184, 244, 1);
     --fgIn: rgba(255, 255, 255, 1);
     --fgClock: rgba(198, 98, 9, 1);
@@ -89,7 +89,7 @@ body {
 .symbols-form {
     color: var(--fgIcon);
     font-size: 1.5rem;
-    width: 3rem;
+    width: 2rem;
 }
 
 .actions {
@@ -100,51 +100,51 @@ body {
 }
 
 .action {
-    padding: 4px;
-    background-color: var(--bgTransparent);
-    color: var(--fgDim);
+    margin-left: .5rem;
     border-radius: 0.35rem;
+    opacity: .5;
+    color: var(--fgDim);
+    background-color: var(--bgTransparent);
 }
 
 .action:focus,
 .action:hover {
     opacity: 1;
     background-color: var(--bgOpaque);
-    color: red;
+    color: var(--fgBright);
 }
 
-.video-main {
-    width: 100%;
-    height: 100%;
-    background: rgb(30, 30, 30);
-}
-.video-item {
-    width: 100%;
-    background: rgb(30, 30, 30);
-}
 .container {
     display: grid;
-    /*grid-template-areas: "list content content content content";*/
-    grid-template-columns: minmax(25rem,24%) auto;
+    grid-template-columns: minmax(20rem,24%) auto;
     grid-column-gap: .5rem;
     background-color: rgb(30, 30, 30);
     width: 100%;
 }
+@media screen and (max-width: 44rem) {
+    .container {
+        grid-template-columns: auto;
+    }
+}
+
 .list {
     width: 100%;
 }
-.list-item {
+.list-item, .content {
     margin-bottom: .75rem;
     padding-bottom: .5rem;
     background-color: rgba(0,31,31,.4);
 }
 .content {
+    padding-right: .5rem;
     width: 100%;
     height: 100%;
+    overflow-y: noscroll;
 }
 .video {
     width: 100%;
 }
+
 .message {
     position: absolute;
     top: 20px;
@@ -159,16 +159,16 @@ body {
 
 .clock {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    font-size: 32px;
-    font-weight: bold;
-    padding: 20px;
+    top: 3rem;
+    right: 2rem;
+    font-size: 2rem;
+    padding: 1rem;
     box-sizing: border-box;
     color: var(--fgIcon);
 }
 
 .clock:hover {
-    color: orange;
-    background-color: rgba(0, 255, 127, 0.2);
+    color:var(--fgClock);
+    background-color: var(--bgOpaque);
+    font-weight: bold;
 }

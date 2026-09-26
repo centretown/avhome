@@ -34,3 +34,4 @@ go.work.sum
 web/Resizable.js
 web/reader.js
 avhome
+database/

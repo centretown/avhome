@@ -13,8 +13,10 @@
         <script src="/static/home.js"></script>
     </head>
     <body>
-        <div class="container">{{template "camera.list" .}}</div>
-        <div id="clock" class="clock"></div>
+        <span id="events" hx-ext="ws" ws-connect="/events">
+            <div class="container">{{template "camera.list" .}}</div>
+            <div id="clock" class="clock w3-round-large"></div>
+        </span>
         <script>
             const contentView = document.getElementById("camera-content");
             const listView = document.getElementById("camera-list");
