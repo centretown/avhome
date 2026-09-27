@@ -14,12 +14,15 @@
     </head>
     <body>
         <span id="events" hx-ext="ws" ws-connect="/events">
-            <div class="container">{{template "camera.list" .}}</div>
-            <div id="clock" class="clock w3-round-large"></div>
+            <div class="container">{{template "main.view" .}}</div>
+            <div id="current-status" class="status w3-round-large">
+                {{template "clock" .}}
+                {{template "current.summary" .Weather}}
+            </div>
         </span>
         <script>
-            const contentView = document.getElementById("camera-content");
-            const listView = document.getElementById("camera-list");
+            const contentView = document.getElementById("main-content");
+            const listView = document.getElementById("side-list");
             let windowWidth = window.innerWidth;
             let windowHeight = window.innerHeight;
             startClock();

@@ -17,13 +17,13 @@ const (
 	currentTrailer = "&current=temperature_2m,precipitation,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,rain,showers,cloud_cover,pressure_msl,surface_pressure,snowfall"
 )
 
-func FirstTicker() (ticker time.Duration) {
+func FirstTicker(span int) (ticker time.Duration) {
 	now := time.Now()
 	next := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(),
 		now.Minute(), 0, 0, now.Location())
-	minute := 15 - next.Minute()%15
+	minute := span - next.Minute()%span
 	if minute == 0 {
-		minute = 15
+		minute = span
 	}
 	next = next.Add(time.Duration(minute) * time.Minute)
 	if next.Compare(now) < 0 {
@@ -34,34 +34,36 @@ func FirstTicker() (ticker time.Duration) {
 	return
 }
 
-func (rt *Runtime) Monitor() {
-	var (
-		now         time.Time
-		resetTicker = true
-	)
-
-	for {
-		now = <-rt.Ticker.C
-		if resetTicker {
-			rt.Ticker.Reset(time.Minute * 15)
-			resetTicker = false
-		}
-		rt.QueryCurrent()
-		if now.Minute() == 0 {
-			rt.QueryHourly()
-			if now.Hour()%4 == 0 {
-				rt.QueryDaily()
-			}
-		}
-		rt.BroadcastTemperature()
-		time.Sleep(time.Second)
-	}
-}
+// func (rt *Runtime) Monitor() {
+// 	var (
+// 		now         time.Time
+// 		resetTicker = true
+// 	)
+//
+// 	for {
+// 		now = <-rt.Ticker.C
+// 		if resetTicker {
+// 			rt.Ticker.Reset(time.Minute * 15)
+// 			resetTicker = false
+// 		}
+// 		rt.QueryCurrent()
+// 		if now.Minute() == 0 {
+// 			rt.QueryHourly()
+// 			if now.Hour()%4 == 0 {
+// 				rt.QueryDaily()
+// 			}
+// 		}
+// 		rt.BroadcastTemperature()
+// 		time.Sleep(time.Second)
+// 	}
+// }
 
 func (rt *Runtime) QueryDaily() {
 	log.Println("Retrieving daily weather forecast...")
 	for _, location := range rt.Locations {
-		daily := &WeatherDaily{}
+		daily := &WeatherDaily{
+			Daily: &Daily{},
+		}
 		query := fmt.Sprintf(weatherFormat, weatherHeader, location.Latitude, location.Longitude, location.Zone, dailyTrailer)
 		err := queryAndDecode(query, daily)
 		if err != nil {
@@ -83,7 +85,9 @@ func (rt *Runtime) QueryHourly() {
 	log.Println("Retrieving hourly weather forecast...")
 	for _, location := range rt.Locations {
 		query := fmt.Sprintf(weatherFormat, weatherHeader, location.Latitude, location.Longitude, location.Zone, hourlyTrailer)
-		hourly := &WeatherHourly{}
+		hourly := &WeatherHourly{
+			Hourly: &Hourly{},
+		}
 		err := queryAndDecode(query, hourly)
 		if err != nil {
 			log.Printf("QueryHourly queryAndDecode: %v", err)
@@ -98,7 +102,9 @@ func (rt *Runtime) QueryHourly() {
 func (rt *Runtime) QueryCurrent() {
 	log.Println("Retrieving current weather conditions...")
 	for _, location := range rt.Locations {
-		current := &WeatherCurrent{}
+		current := &WeatherCurrent{
+			Current: &Current{},
+		}
 		query := fmt.Sprintf(weatherFormat, weatherHeader, location.Latitude, location.Longitude, location.Zone, currentTrailer)
 
 		err := queryAndDecode(query, current)

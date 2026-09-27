@@ -1,17 +1,19 @@
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 body {
     --bgOpaque: rgba(0, 0, 0, 1);
     --bgTransparent: rgba(0, 0, 0, 0);
+    --bgSemiTransparent: rgba(0, 0, 0, 0.375);
     --bgH3: rgba(0, 127, 255, 0.15);
     --fgBright: rgba(165, 208, 198, 1);
     --fgSelected: rgba(200, 255, 240, 1);
     --fgDim: rgba(165, 208, 198, 0.4);
     --fgOut: rgba(120, 184, 244, 1);
     --fgIn: rgba(255, 255, 255, 1);
-    --fgClock: rgba(198, 98, 9, 1);
+    --fgClock: rgba(255, 98, 9, 1);
+    --fgCity:rgba(127, 255, 0, 1);
     --fgStatus: rgba(255, 255, 0, 0.9);
     --fgIcon: rgba(120, 184, 244, 1);
     --fgDateIcon: rgba(120, 184, 244, 0.5);
@@ -42,6 +44,7 @@ body {
 .material-symbols-outlined,
 .symbols,
 .symbols-title,
+.symbols-status,
 .symbols-weather,
 .symbols-weather-medium,
 .symbols-small,
@@ -85,6 +88,10 @@ body {
 .symbols-title {
     font-size: 1.75rem;
 }
+.symbols-status {
+    margin-left: .5rem;
+    font-size: 1.5rem;
+}
 
 .symbols-form {
     color: var(--fgIcon);
@@ -100,9 +107,9 @@ body {
 }
 
 .action {
-    margin-left: .5rem;
+    margin-left: 0.5rem;
     border-radius: 0.35rem;
-    opacity: .5;
+    opacity: 0.5;
     color: var(--fgDim);
     background-color: var(--bgTransparent);
 }
@@ -116,8 +123,8 @@ body {
 
 .container {
     display: grid;
-    grid-template-columns: minmax(20rem,24%) auto;
-    grid-column-gap: .5rem;
+    grid-template-columns: minmax(20rem, 24%) auto;
+    grid-column-gap: 0.5rem;
     background-color: rgb(30, 30, 30);
     width: 100%;
 }
@@ -127,16 +134,19 @@ body {
     }
 }
 
-.list {
+.side-list {
     width: 100%;
+    height: 100vh;
+    overflow-y: auto;
 }
-.list-item, .content {
-    margin-bottom: .75rem;
-    padding-bottom: .5rem;
-    background-color: rgba(0,31,31,.4);
+.side-list-item,
+.main-content {
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    background-color: rgba(0, 31, 31, 0.4);
 }
-.content {
-    padding-right: .5rem;
+.main-content {
+    padding-right: 0.5rem;
     width: 100%;
     height: 100%;
     overflow-y: noscroll;
@@ -157,18 +167,89 @@ body {
     text-shadow: 0 0 5px black;
 }
 
-.clock {
+.status {
     position: fixed;
     top: 3rem;
     right: 2rem;
     font-size: 2rem;
+    font-weight: bold;
     padding: 1rem;
     box-sizing: border-box;
-    color: var(--fgIcon);
+    background-color: var(--bgTransparent);
 }
 
-.clock:hover {
-    color:var(--fgClock);
-    background-color: var(--bgOpaque);
-    font-weight: bold;
+.status:hover {
+    opacity: 1;
+    color: var(--fgClock);
+    background-color: var(--bgSemiTransparent);
+    color: var(--fgClock);
+}
+
+.clock {
+    opacity: 0.5;
+    color: var(--fgClock);
+}
+
+.city {
+    /*opacity: 0.5;*/
+    font-size: 2rem;
+    color: var(--fgCity);
+}
+
+.summary {
+    font-size: 1.5rem;
+    opacity: 0.5;
+    color: var(--fgStatus);
+}
+
+.windspeed {
+    color: rgba(255, 218, 185, 255);
+}
+.windgusts {
+    color: rgba(255, 239, 213, 255);
+}
+.humidity {
+    color: rgba(221, 160, 221, 255);
+}
+.pressure {
+    color: rgba(255, 153, 153, 255);
+}
+.surface {
+    color: rgba(230, 103, 113, 255);
+}
+.precipitation {
+    color: rgba(0, 255, 255, 255);
+}
+.probability {
+    color: rgba(8, 146, 208, 255);
+}
+.shower {
+    color: rgba(135, 206, 235, 255);
+}
+.rain {
+    color: rgba(31, 144, 255, 255);
+}
+.snow {
+    color: rgba(255, 255, 255, 255);
+}
+.cloud {
+    color: rgba(119, 139, 165, 255);
+}
+.temperature {
+    color: rgba(255, 69, 0, 255);
+}
+.feelslike {
+    color: rgba(255, 140, 0, 255);
+}
+.temperature-high {
+    color: rgba(233, 105, 44, 255);
+}
+.temperature-low {
+    color: rgba(255, 179, 71, 255);
+}
+.daylight {
+    color: rgba(255, 225, 53, 255);
+}
+.sunshine {
+    color: rgba(255, 255, 0, 255);
 }

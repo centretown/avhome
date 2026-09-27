@@ -3,7 +3,6 @@ package weather
 import (
 	"avhome/action"
 	"avhome/socket"
-	"bytes"
 	"fmt"
 	"html/template"
 	"log"
@@ -17,39 +16,30 @@ type Runtime struct {
 	Location      *Location
 	Locations     []*Location
 	LocationIndex int
-	WebcamUrl     string
-	WebcamIndex   int
-	ActionsHome   []*action.Action
+	Actions       []*action.Action
 	ActionMap     map[string]*action.Action
-	WebSocket     *socket.Server
-	Template      *template.Template
-	Ticker        *time.Ticker
 	retry         *time.Ticker
 	db            *sqlx.DB
 	mux           *http.ServeMux
 }
 
-func NewRuntime(mux *http.ServeMux, tmpl *template.Template) (rt *Runtime) {
+func NewRuntime(mux *http.ServeMux, tmpl *template.Template, sock *socket.Server) (rt *Runtime) {
 	rt = &Runtime{
-		mux:      mux,
-		Template: tmpl,
-		ActionsHome: []*action.Action{
+		mux: mux,
+		Actions: []*action.Action{
 			{Name: "weather_current", Title: "Current Weather", Icon: "thunderstorm", Group: action.Home},
 			{Name: "weather_hourly", Title: "24 Hour Forecast", Icon: "schedule", Group: action.Home},
 			{Name: "weather_daily", Title: "7 Day Forecast", Icon: "calendar_view_week", Group: action.Home},
-			// {Name: "lights", Title: "LED Lights", Icon: "backlight_high", Group: action.Home},
 		},
-
 		ActionMap: make(map[string]*action.Action),
 	}
-	for _, action := range rt.ActionsHome {
+	for _, action := range rt.Actions {
 		rt.ActionMap[action.Name] = action
 	}
 	return
 }
 
-func (rt *Runtime) Run() (err error) {
-	rt.Ticker = time.NewTicker(FirstTicker())
+func (rt *Runtime) Connect() (err error) {
 	err = rt.ConnectLocationData()
 	if err != nil {
 		log.Print(err)
@@ -167,13 +157,6 @@ func (rt *Runtime) CurrentTemperature() string {
 		hourly.HourlyUnits.Temperature)
 }
 
-func (rt *Runtime) BroadcastTemperature() {
-	buf := bytes.Buffer{}
-	t := rt.Template.Lookup("weather.clock")
-	t.Execute(&buf, rt)
-	rt.WebSocket.Broadcast(buf.String())
-}
-
 type FormData struct {
 	Action  *action.Action
 	Data    any
@@ -188,37 +171,37 @@ type WeatherFormData struct {
 	Runtime *Runtime
 }
 
-func (rt *Runtime) HandleAction(path string, templ string, data *WeatherFormData) {
-	rt.mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-		if len(path) < 2 {
-			return
-		}
-		w.Header().Add("Cache-Control", "no-cache")
-		w.WriteHeader(http.StatusOK)
-		data.Action = rt.ActionMap[path[1:]]
+// func (rt *Runtime) HandleAction(path string, templ string, data *WeatherFormData) {
+// 	rt.mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
+// 		if len(path) < 2 {
+// 			return
+// 		}
+// 		w.Header().Add("Cache-Control", "no-cache")
+// 		w.WriteHeader(http.StatusOK)
+// 		data.Action = rt.ActionMap[path[1:]]
+//
+// 		err := rt.Template.Lookup(templ).Execute(w, data)
+// 		if err != nil {
+// 			log.Fatal(path, err)
+// 		}
+// 	})
+//
+// }
+//
+// func (rt *Runtime) HandleWeather() {
+// 	data := &WeatherFormData{
+// 		Codes:   WeatherCodes,
+// 		Data:    rt.Locations,
+// 		Runtime: rt}
+//
+// 	rt.HandleAction("/weather_daily", "weather.daily", data)
+// 	rt.HandleAction("/weather_hourly", "weather.hourly", data)
+// 	rt.HandleAction("/weather_current", "weather.current", data)
+//
+// }
 
-		err := rt.Template.Lookup(templ).Execute(w, data)
-		if err != nil {
-			log.Fatal(path, err)
-		}
-	})
-
-}
-
-func (rt *Runtime) HandleWeather() {
-	data := &WeatherFormData{
-		Codes:   WeatherCodes,
-		Data:    rt.Locations,
-		Runtime: rt}
-
-	rt.HandleAction("/weather_daily", "weather.daily", data)
-	rt.HandleAction("/weather_hourly", "weather.hourly", data)
-	rt.HandleAction("/weather_current", "weather.current", data)
-
-}
-
-func wrapStatus(id, msg string) []byte {
-	var buf []byte
-	buf = fmt.Appendf(buf, `<div id="%s" class="status">%s</div>`, id, msg)
-	return buf
-}
+// func wrapStatus(id, msg string) []byte {
+// 	var buf []byte
+// 	buf = fmt.Appendf(buf, `<div id="%s" class="status">%s</div>`, id, msg)
+// 	return buf
+// }

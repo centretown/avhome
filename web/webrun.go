@@ -3,6 +3,7 @@ package web
 import (
 	"avhome/socket"
 	"avhome/weather"
+	"bytes"
 	"embed"
 	"html/template"
 	"log"
@@ -79,18 +80,12 @@ func Run() {
 		httpTemplate = t
 	}
 	refreshTemplate()
-	webRun.Weather = weather.NewRuntime(mux, httpTemplate)
-	err = webRun.Weather.Run()
-	if err != nil {
-		log.Printf("failed to start weather service: %v\n", err)
-		return
-	}
 
-	sockServer = socket.NewServer(httpTemplate)
+	sockServer = socket.NewServer()
 	sockServer.Run()
 	defer sockServer.Done()
 	mux.HandleFunc("/events", sockServer.Events)
-	mux.HandleFunc("/msghook", sockServer.MessageHook)
+	// mux.HandleFunc("/msghook", sockServer.MessageHook)
 
 	mux.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/static/", fs).ServeHTTP(w, r)
@@ -110,14 +105,47 @@ func Run() {
 
 	go serve(server)
 
+	webRun.Weather = weather.NewRuntime(mux, httpTemplate, sockServer)
+	err = webRun.Weather.Connect()
+	if err != nil {
+		log.Printf("failed to connect weather service: %v\n", err)
+		return
+	}
+	defer webRun.Weather.Done()
+	webRun.Weather.QueryCurrent()
+	webRun.Weather.QueryDaily()
+	webRun.Weather.QueryHourly()
+
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, os.Interrupt)
 
+	resetTicker := true
+	span := 15
+	ticker := time.NewTicker(firstTicker(span))
+	rt := webRun.Weather
+	buf := bytes.Buffer{}
+	now := time.Now()
 	for {
 		select {
 		case sig := <-sigs:
 			log.Printf("Signal: %v", sig)
 			return
+		case now = <-ticker.C:
+			if resetTicker {
+				ticker.Reset(time.Duration(span) * time.Minute)
+				resetTicker = false
+			}
+			if now.Minute() == 0 {
+				rt.QueryHourly()
+				if now.Hour()%4 == 0 {
+					rt.QueryDaily()
+				}
+			}
+
+			rt.QueryCurrent()
+			t := httpTemplate.Lookup("current.summary")
+			t.Execute(&buf, rt)
+			sockServer.Broadcast(buf.String())
 		default:
 			time.Sleep(time.Millisecond * 10)
 		}
@@ -132,98 +160,19 @@ func serve(server *http.Server) {
 	}
 }
 
-func Monitor(rt *weather.Runtime) {
-	var (
-		now         time.Time
-		resetTicker = true
-	)
-
-	for {
-		select {
-		case now = <-rt.Ticker.C:
-			if resetTicker {
-				rt.Ticker.Reset(time.Minute * 15)
-				resetTicker = false
-			}
-			rt.QueryCurrent()
-			if now.Minute() == 0 {
-				rt.QueryHourly()
-				if now.Hour()%4 == 0 {
-					rt.QueryDaily()
-				}
-			}
-			rt.BroadcastTemperature()
-		default:
-			time.Sleep(time.Second)
-		}
+func firstTicker(span int) (ticker time.Duration) {
+	now := time.Now()
+	next := time.Date(now.Year(), now.Month(), now.Day(), now.Hour(),
+		now.Minute(), 0, 0, now.Location())
+	minute := span - next.Minute()%span
+	if minute == 0 {
+		minute = span
 	}
+	next = next.Add(time.Duration(minute) * time.Minute)
+	if next.Compare(now) < 0 {
+		log.Fatal(minute, now, next)
+	}
+	ticker = next.Sub(now)
+	// log.Printf("ticker=%v, minute=%v now=%v next=%v\n", ticker, minute, now, next)
+	return
 }
-
-//
-// func (rt *Runtime) QueryDaily() {
-// 	log.Println("Retrieving daily weather forecast...")
-// 	for _, location := range rt.Locations {
-// 		daily := &WeatherDaily{}
-// 		query := fmt.Sprintf(weatherFormat, weatherHeader, location.Latitude, location.Longitude, location.Zone, dailyTrailer)
-// 		err := queryAndDecode(query, daily)
-// 		if err != nil {
-// 			log.Printf("QueryDaily: queryAndDecode %v", err)
-// 			continue
-// 		}
-// 		location.WeatherDaily = daily
-// 		location.WeatherDaily.UpdateTime = time.Now()
-// 		location.BuildDailyProperties()
-// 	}
-// }
-//
-// type LocationData struct {
-// 	Index    int
-// 	Location *Location
-// }
-//
-// func (rt *Runtime) QueryHourly() {
-// 	log.Println("Retrieving hourly weather forecast...")
-// 	for _, location := range rt.Locations {
-// 		query := fmt.Sprintf(weatherFormat, weatherHeader, location.Latitude, location.Longitude, location.Zone, hourlyTrailer)
-// 		hourly := &WeatherHourly{}
-// 		err := queryAndDecode(query, hourly)
-// 		if err != nil {
-// 			log.Printf("QueryHourly queryAndDecode: %v", err)
-// 			continue
-// 		}
-// 		location.WeatherHourly = hourly
-// 		location.WeatherHourly.UpdateTime = time.Now()
-// 		location.BuildHourlyProperties()
-// 	}
-// }
-//
-// func (rt *Runtime) QueryCurrent() {
-// 	log.Println("Retrieving current weather conditions...")
-// 	for _, location := range rt.Locations {
-// 		current := &WeatherCurrent{}
-// 		query := fmt.Sprintf(weatherFormat, weatherHeader, location.Latitude, location.Longitude, location.Zone, currentTrailer)
-//
-// 		err := queryAndDecode(query, current)
-// 		if err != nil {
-// 			continue
-// 		}
-// 		if current.Current == nil {
-// 			log.Println("current.Current is nil!")
-// 			continue
-// 		}
-// 		// log.Println("rt.db ", rt.db, "current ", current)
-// 		err = InsertHistory(rt.db, location.ID, current.Current)
-// 		if err != nil {
-// 			log.Println(err)
-// 			continue
-// 		}
-//
-// 		location.WeatherCurrent = current
-// 		location.WeatherCurrent.UpdateTime = time.Now()
-// 	}
-//
-// 	err := rt.LoadHistory()
-// 	if err != nil {
-// 		log.Printf("Weather current load history error: %v", err)
-// 	}
-// }

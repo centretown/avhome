@@ -1,0 +1,28 @@
+{{define "clock"}}
+<div id="clock" class="clock w3-round-large"></div>
+{{end}}
+<!---->
+{{define "current.summary"}}
+<span id="current-summary" class="summary" hx-swap-oob="outerHTML">
+    {{$w:=.Location.WeatherCurrent}}{{$cur:=$w.Current}}{{$units:=$w.CurrentUnits}}
+    <!--  -->
+    {{$code:=$w.WeatherCode $cur.Code}}
+    <div>
+    <span class="symbols" style="color:{{$code.Color}}">{{$code.Icon}}</span>
+    <span class="city">{{.Location.City}}</span>
+    </div>
+    <div>
+        <span class="symbols-status temperature">thermometer</span>
+        <span>{{$cur.Temperature}}{{$units.Temperature}}</span>
+        <span class="symbols-status precipitation">weather_mix</span>
+        <span> {{$cur.Precipitation}} {{$units.Precipitation}} </span>
+    </div>
+    <div>
+        <span class="symbols-status windspeed">toys_fan</span>
+        <span>
+            {{$cur.WindSpeed}} {{$units.WindSpeed}}
+            {{$cur.WindDirection}}{{$units.WindDirection}}
+        </span>
+    </div>
+</span>
+{{end}}
