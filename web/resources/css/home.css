@@ -172,29 +172,26 @@ body {
 
 .main-content,
 .side-list {
-    grid-area: list;
     width: 100%;
-}
-
-.view-item {
-    margin-bottom: 0.75rem;
 }
 
 @media screen and (min-width: 50rem) {
     .container {
         display: grid;
         grid-template-areas: "list content";
-        grid-template-columns: 3fr 9fr; grid-column-gap: 0.5rem;
+        grid-template-columns: 3fr 8fr;
+        grid-column-gap: 0.5rem;
         width: 100%;
+        overflow-y: noscroll;
     }
     .main-content {
         grid-area: content;
-        padding-right: 0.5rem;
         width: 100%;
-        height: 100%;
-        overflow-y: noscroll;
+        height: 100vh;
+        overflow-y: auto;
     }
     .side-list {
+        grid-area: list;
         height: 100vh;
         overflow-y: auto;
     }
