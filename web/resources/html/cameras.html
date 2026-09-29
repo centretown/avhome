@@ -1,43 +1,62 @@
 {{ define "main.view" }}
 <!---->
+{{$content:=index .Paths.Items 1}}
+<div id="main-content" class="main-content">
+    <div id="section-{{$content.Name}}" class="view-item w3-round">
+        {{template "folder.header" $content}}
+        <!---->
+        {{template "camera.video" $content}}
+        <!---->
+    </div>
+</div>
+
 <div id="side-list" class="side-list">
     {{range $i, $camera := .Paths.Items}}
     <!---->
     {{if (ne $i 1)}}
-    <div id="section-{{$camera.Name}}" class="list-item w3-round">
+    <div id="section-{{$camera.Name}}" class="view-item w3-round">
+        {{template "folder.header" $camera}}
+        <!---->
         {{template "camera.video" $camera}}
         <!---->
     </div>
     {{end}} {{end}}
-</div>
-{{$content:=index .Paths.Items 1}}
-<div id="main-content" class="main-content">
-    <div id="section-{{$content.Name}}" class="">
-        {{template "camera.video" $content}}
-        <!---->
-    </div>
 </div>
 <!---->
 {{end}}
 <!---->
 
 {{ define "camera.video"}}
-<div class="w3-blue-gray w3-padding-small w3-round">Camera: {{.Name}}</div>
-<video
-    id="video-{{.Name}}"
-    class="video"
-    controls
-    muted
-    autoplay
-    playsinline
-></video>
-<div id="message-{{.Name}}" class="message"></div>
-<button
-    class="action"
-    hx-on:click="swapContentVideo('section-{{.Name}}');"
-    hx-swap="none"
+<!---->
+<div id="{{.Name}}-fold" class="w3-margin-bottom">
+    <video
+        id="video-{{.Name}}"
+        class="video"
+        controls
+        muted
+        autoplay
+        playsinline
+    ></video>
+    <div id="message-{{.Name}}" class="message"></div>
+    <button
+        class="action"
+        hx-on:click="swapContentVideo('section-{{.Name}}');"
+        hx-swap="none"
+    >
+        <span class="symbols">swap_horiz</span>
+    </button>
+</div>
+{{end}}
+<!---->
+{{define "folder.header"}}
+<div
+    id="{{.Name}}-header"
+    class="w3-dark-gray w3-padding-small w3-round folder-header"
+    hx-on:click="toggle_fold('{{.Name}}-fold','{{.Name}}-icon')"
 >
-    <span class="symbols-form">background_replace</span>
-</button>
+    <span id="{{.Name}}-icon" class="symbols w3-text-dark-gray"
+        >arrow_right</span
+    ><span class="folder-text">{{.Name}}</span>
+</div>
 {{end}}
 <!---->

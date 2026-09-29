@@ -1,28 +1,3 @@
-function addReader(video_id, pathName, message_id) {
-  const video_element = document.getElementById(video_id);
-  const message_element = document.getElementById(message_id);
-  return new MediaMTXWebRTCReader({
-    url: "http://192.168.10.7:8889/" + pathName + "/whep",
-    user: "", // fill if needed
-    pass: "", // fill if needed
-    token: "", // fill if needed
-    onError: (err) => {
-      message_element.innerText = err;
-    },
-    onTrack: (evt) => {
-      video_element.controls = true;
-      video_element.srcObject = evt.streams[0];
-      message_element.innerText = "";
-    },
-    onDataChannel: (evt) => {
-      evt.channel.binaryType = "arraybuffer";
-      evt.channel.onmessage = (evt) => {
-        console.log("data channel message", evt.data);
-      };
-    },
-  });
-}
-
 function swapClass(id, klass1) {
   const element = document.getElementById(id);
   if (element.className.includes(klass1)) {
@@ -33,13 +8,22 @@ function swapClass(id, klass1) {
   return;
 }
 
-
 function swapContentVideo(id) {
-  const element = document.getElementById(id);
-  const previous = contentView.firstElementChild;
-  contentView.clientWidth, contentView.clientHeight
-  contentView.append(element);
-  listView.append(previous);
+  let element = document.getElementById(id);
+  if (element === undefined) {
+    console.log(id, "undefined");
+    return;
+  }
+
+  if (element.parentElement.id === "side-list") {
+    const swap = contentView.firstElementChild;
+    listView.append(swap);
+    contentView.append(element);
+  } else {
+    const swap = listView.firstElementChild;
+    contentView.append(swap);
+    listView.append(element);
+  }
 }
 
 function startClock() {
@@ -55,4 +39,32 @@ function startClock() {
 
   document.getElementById("clock").innerHTML = clockFmt.format(today);
   setTimeout(startClock, 1000 * (60 - today.getSeconds()));
+}
+
+const w3_hide = "w3-hide";
+const icon_down = "arrow_drop_down";
+const icon_right = "arrow_right";
+const element_not_found = "element not found";
+const invalid_arguments = "invalid arguments";
+
+function toggle_fold(id, icon_id) {
+  const elt = document.getElementById(id);
+  const icon_elt = document.getElementById(icon_id);
+  if (elt && icon_elt) {
+    if (elt.className.indexOf(w3_hide) == -1) {
+      elt.classList.add(w3_hide);
+      icon_elt.innerHTML = icon_right;
+    } else {
+      elt.classList.remove(w3_hide);
+      icon_elt.innerHTML = icon_down;
+    }
+  }
+}
+
+function get_folded(id) {
+  const elt = document.getElementById(id);
+  if (elt && elt.className.indexOf(w3_hide) == -1) {
+    return icon_right;
+  }
+  return icon_down;
 }

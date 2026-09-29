@@ -92,6 +92,12 @@ func Run() {
 	})
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Print(r.Host)
+		if strings.HasPrefix(r.Host, "192.168.10") {
+			webRun.MtxUrl = "192.168.10.7"
+		} else if strings.HasPrefix(r.Host, "10.0.0") {
+			webRun.MtxUrl = "10.0.0.7"
+		}
 		refreshTemplate()
 		mainTmpl := httpTemplate.Lookup("main")
 		w.WriteHeader(http.StatusOK)

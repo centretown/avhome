@@ -1,0 +1,71 @@
+{{define "mtxpaths"}}
+<!---->
+<script>
+    const mtx_paths = [];
+    const readers = [];
+</script>
+
+{{$url:=.MtxUrl}}
+<!---->
+{{range $c := .Paths.Items}}
+<script>
+    mtx_paths.push({
+        host: "{{$url}}",
+        name: "{{$c.Name}}",
+    });
+</script>
+{{end}}
+<!---->
+<script>
+    console.log(mtx_paths);
+
+    function addPath(path) {
+      mtx_paths.push(path);
+      activateReader(path);
+    }
+
+    function activateReader(path) {
+      readers.push(
+          addReader(
+              path.host,
+              "video-" + path.name,
+              path.name,
+              "message-" + path.name,
+          ),
+      );
+    }
+
+    function loadPaths() {
+        for (let path of mtx_paths) {
+            console.log(path.host, path.name);
+            activateReader(path);
+        }
+    }
+
+    function addReader(host, video_id, pathName, message_id) {
+        const video_element = document.getElementById(video_id);
+        const message_element = document.getElementById(message_id);
+        return new MediaMTXWebRTCReader({
+            url: "http://" + host + ":8889/" + pathName + "/whep",
+            user: "", // fill if needed
+            pass: "", // fill if needed
+            token: "", // fill if needed
+            onError: (err) => {
+                message_element.innerText = err;
+            },
+            onTrack: (evt) => {
+                video_element.controls = true;
+                video_element.srcObject = evt.streams[0];
+                message_element.innerText = "";
+            },
+            onDataChannel: (evt) => {
+                evt.channel.binaryType = "arraybuffer";
+                evt.channel.onmessage = (evt) => {
+                    console.log("data channel message", evt.data);
+                };
+            },
+        });
+    }
+</script>
+{{end}}
+<!---->

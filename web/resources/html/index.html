@@ -7,6 +7,7 @@
         <meta name="viewport" content="width=device-width" />
         <link rel="stylesheet" href="/static/css/w3.css" />
         <link rel="stylesheet" href="/static/css/home.css" />
+        <link rel="stylesheet" href="/static/css/weather.css" />
         <script src="/static/js/htmx.js"></script>
         <script src="/static/js/ws.js"></script>
         <script src="/static/js/reader.js"></script>
@@ -16,10 +17,10 @@
         <span id="events" hx-ext="ws" ws-connect="/events">
             <div class="container">{{template "main.view" .}}</div>
             <div id="current-status" class="status w3-round-large">
-                {{template "clock" .}}
-                {{template "current.summary" .Weather}}
+                {{template "clock" .}} {{template "current.summary" .Weather}}
             </div>
         </span>
+        {{template "mtxpaths" .}}
         <script>
             const contentView = document.getElementById("main-content");
             const listView = document.getElementById("side-list");
@@ -27,12 +28,9 @@
             let windowHeight = window.innerHeight;
             startClock();
             reportWindowSize();
-            let readers = [];
             window.addEventListener("load", () => {
-                {{range $i, $c := .Paths.Items}}
-                readers[{{$i}}] =
-                  addReader("video-{{$c.Name}}", "{{$c.Name}}", "message-{{$c.Name}}");
-                {{end}}
+                loadPaths();
+                console.log(mtx_paths);
             });
 
             window.addEventListener("beforeunload", () => {
@@ -45,12 +43,12 @@
                 }
             });
 
-            window.onresize = reportWindowSize;
+            // window.onresize = reportWindowSize;
             function reportWindowSize() {
-              windowWidth = window.innerWidth*4/5;
-              windowHeight = window.innerHeight;
-              console.log(windowWidth, windowHeight);
-              console.log(contentView.clientWidth, contentView.clientHeight);
+                windowWidth = (window.innerWidth * 4) / 5;
+                windowHeight = window.innerHeight;
+                console.log(windowWidth, windowHeight);
+                console.log(contentView.clientWidth, contentView.clientHeight);
             }
         </script>
     </body>

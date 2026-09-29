@@ -30,8 +30,9 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+.zed/
 
 web/Resizable.js
-web/reader.js
 avhome
 database/location.db
+material/

@@ -1,0 +1,52 @@
+
+.windspeed {
+    color: rgba(255, 218, 185, 255);
+}
+.windgusts {
+    color: rgba(255, 239, 213, 255);
+}
+.humidity {
+    color: rgba(221, 160, 221, 255);
+}
+.pressure {
+    color: rgba(255, 153, 153, 255);
+}
+.surface {
+    color: rgba(230, 103, 113, 255);
+}
+.precipitation {
+    color: rgba(0, 255, 255, 255);
+}
+.probability {
+    color: rgba(8, 146, 208, 255);
+}
+.shower {
+    color: rgba(135, 206, 235, 255);
+}
+.rain {
+    color: rgba(31, 144, 255, 255);
+}
+.snow {
+    color: rgba(255, 255, 255, 255);
+}
+.cloud {
+    color: rgba(119, 139, 165, 255);
+}
+.temperature {
+    color: rgba(255, 69, 0, 255);
+}
+.feelslike {
+    color: rgba(255, 140, 0, 255);
+}
+.temperature-high {
+    color: rgba(233, 105, 44, 255);
+}
+.temperature-low {
+    color: rgba(255, 179, 71, 255);
+}
+.daylight {
+    color: rgba(255, 225, 53, 255);
+}
+.sunshine {
+    color: rgba(255, 255, 0, 255);
+}
