@@ -16,17 +16,15 @@
     <body>
         <span id="events" hx-ext="ws" ws-connect="/events">
             <div class="container">{{template "main.view" .}}</div>
-            <div id="current-status" class="status w3-round-large">
-                {{template "clock" .}} {{template "current.summary" .Weather}}
-            </div>
         </span>
         {{template "mtxpaths" .}}
         <script>
             const contentView = document.getElementById("main-content");
+            const summaryView = document.getElementById("summary");
             const listView = document.getElementById("side-list");
+
             let windowWidth = window.innerWidth;
             let windowHeight = window.innerHeight;
-            startClock();
             reportWindowSize();
             window.addEventListener("load", () => {
                 loadPaths();
@@ -43,12 +41,16 @@
                 }
             });
 
-            // window.onresize = reportWindowSize;
+            window.onresize = reportWindowSize;
             function reportWindowSize() {
                 windowWidth = (window.innerWidth * 4) / 5;
                 windowHeight = window.innerHeight;
                 console.log(windowWidth, windowHeight);
-                console.log(contentView.clientWidth, contentView.clientHeight);
+                console.log(summaryView.style.height);
+                let h = windowHeight - 96;
+                console.log("height:", h);
+                listView.style.height = "" + h + "px";
+                console.log(listView.style.height);
             }
         </script>
     </body>

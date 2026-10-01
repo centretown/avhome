@@ -1,6 +1,3 @@
-{{define "clock"}}
-<div id="clock" class="clock w3-round-large"></div>
-{{end}}
 <!---->
 {{define "current.summary"}}
 <span id="current-summary" class="summary" hx-swap-oob="outerHTML">
@@ -8,7 +5,7 @@
     <!--  -->
     {{$code:=$w.WeatherCode $cur.Code}}
     <div>
-    <span class="symbols" style="color:{{$code.Color}}">{{$code.Icon}}</span>
+    <span class="symbols-status" style="color:{{$code.Color}}">{{$code.Icon}}</span>
     <span class="city">{{.Location.City}}</span>
     </div>
     <div>

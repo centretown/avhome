@@ -1,0 +1,47 @@
+{{ define "weather.common" }}
+<div class="">
+    <div class="weather-label">Latitude</div>
+    <div class="weather-label">Longitude</div>
+    <div class="weather-label">Timezone</div>
+    <div class="weather-label">Elevation</div>
+    <div class="weather-data">{{printf "%5.2f" .Latitude}}</div>
+    <div class="weather-data">{{printf "%5.2f" .Longitude}}</div>
+    <div class="weather-data">{{.Timezone}}</div>
+    <div class="weather-data">{{.Elevation}}</div>
+</div>
+{{ end }}
+<!--  -->
+
+{{ define "weather" }}
+<!---->
+{{template "folder.header" "weather"}}
+<div id="weather-fold" class="w3-margin-bottom w3-hide">
+    <div>hello weather</div>
+    {{template "button.swap" "weather"}}
+</div>
+<!--  -->
+{{ end }}
+<!---->
+{{ define "current.summary" }}
+<div id="summary" class="summary" hx-swap-oob="outerHTML">
+    {{$w:=.Location.WeatherCurrent}}{{$cur:=$w.Current}}{{$units:=$w.CurrentUnits}}
+    <!--  -->
+    {{$code:=$w.WeatherCode $cur.Code}}
+    <!--  -->
+    <div id="clock" class="summary-clock"></div>
+    <div class="symbols-summary summary-icon" style="color:{{$code.Color}}">
+        {{$code.Icon}}
+    </div>
+    <div class="summary-temperature">
+        {{$cur.Temperature}}{{$units.Temperature}}
+        <!--<span> {{$cur.Precipitation}} {{$units.Precipitation}} </span>-->
+    </div>
+</div>
+<script>
+    startClock();
+</script>
+{{ end }}
+<!--  -->
+{{ define "location.weather" }}
+<!--  -->
+{{ end }}

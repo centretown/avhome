@@ -1,21 +1,25 @@
 {{ define "main.view" }}
 <!---->
+{{template "current.summary" .Weather}}
+<!---->
 {{$content:=index .Paths.Items 1}}
 <div id="main-content" class="main-content">
     <div id="section-{{$content.Name}}" class="w3-round">
-        {{template "folder.header" $content}}
+        {{template "folder.header" $content.Name}}
         <!---->
         {{template "camera.video" $content}}
         <!---->
     </div>
 </div>
 
-<div id="side-list" class="side-list">
+<div id="side-list" class="side-list" style="height: getListHeight()">
+    <div id="section-weather" class="w3-round">{{template "weather" .}}</div>
+    <!---->
     {{range $i, $camera := .Paths.Items}}
     <!---->
     {{if (ne $i 1)}}
     <div id="section-{{$camera.Name}}" class="w3-round">
-        {{template "folder.header" $camera}}
+        {{template "folder.header" $camera.Name}}
         <!---->
         {{template "camera.video" $camera}}
         <!---->
@@ -28,7 +32,7 @@
 
 {{ define "camera.video"}}
 <!---->
-<div id="{{.Name}}-fold" class="w3-margin-bottom">
+<div id="{{.Name}}-fold" class="">
     <video
         id="video-{{.Name}}"
         class="video"
@@ -38,20 +42,20 @@
         playsinline
     ></video>
     <div id="message-{{.Name}}" class="message"></div>
-    {{template "button.swap" .}}
+    {{template "button.swap" .Name}}
     <!---->
 </div>
 {{end}}
 <!---->
 {{define "folder.header"}}
 <div
-    id="{{.Name}}-header"
-    class="w3-dark-gray w3-padding-small w3-round folder-header"
-    hx-on:click="toggle_fold('{{.Name}}-fold','{{.Name}}-icon')"
+    id="{{.}}-header"
+    class="folder-header"
+    hx-on:click="toggle_fold('{{.}}-fold','{{.}}-icon')"
 >
-    <span id="{{.Name}}-icon" class="symbols w3-text-dark-gray"
-        >arrow_right</span
-    ><span class="folder-text">{{.Name}}</span>
+    <span id="{{.}}-icon" class="symbols w3-text-dark-gray"
+        >arrow_drop_down</span
+    ><span class="folder-text">{{.}}</span>
 </div>
 {{end}}
 <!---->
@@ -59,7 +63,7 @@
 {{define "button.swap"}}
 <button
     class="action"
-    hx-on:click="swapContentVideo('section-{{.Name}}');"
+    hx-on:click="swapContentVideo('section-{{.}}');"
     hx-swap="none"
 >
     <span class="symbols">swap_horiz</span>

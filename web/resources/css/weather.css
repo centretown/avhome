@@ -50,3 +50,15 @@
 .sunshine {
     color: rgba(255, 255, 0, 255);
 }
+
+.weather-label {
+    font-size: 0.75rem;
+    background-color: var(--bgTransparent);
+    color: var(--fgBright);
+}
+
+.weather-data {
+    font-size: 0.7rem;
+    background-color: var(--bgTransparent);
+    color: var(--fgOut);
+}

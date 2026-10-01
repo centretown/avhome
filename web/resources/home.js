@@ -29,9 +29,9 @@ function swapContentVideo(id) {
 function startClock() {
   const today = new Date();
   let clockFmt = new Intl.DateTimeFormat("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric", // dateStyle: "full",
+    // weekday: "short",
+    // month: "short",
+    // day: "numeric", // dateStyle: "full",
     hour: "numeric",
     minute: "numeric",
     timeZone: "America/New_York",
