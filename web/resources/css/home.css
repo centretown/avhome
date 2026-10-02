@@ -10,7 +10,7 @@ body {
     --bgH3: rgba(0, 127, 255, 0.15);
     --skyblue: rgba(132, 207, 238, 1);
     --bgFolder: rgba(85, 135, 153, 1);
-    --fgFolder: rgba(255, 255, 255, 1);
+    --fgFolder: rgba(0, 0, 0, 1);
     --fgIcon: rgba(211, 255, 255, 1);
 
     --fgBright: rgba(165, 208, 198, 1);
@@ -20,7 +20,7 @@ body {
     --fgIn: rgba(255, 255, 255, 1);
     --fgClock: rgba(127, 255, 0, 1);
     --fgStatus: rgba(255, 255, 0, 0.9);
-    --fgCity: rgba(255, 98, 9, 1);
+    --fgCity: rgba(0, 0, 255, 1);
     --fgDateIcon: rgba(120, 184, 244, 0.5);
 
     --slotImageWidth: 18rem;
@@ -139,6 +139,7 @@ body {
 }
 .folder-text {
     font-size: 1.3rem;
+    font-weight: bold;
     color: var(--fgFolder);
 }
 
@@ -177,13 +178,14 @@ body {
 .summary {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    color: white;
     font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--fgCity);
     background-color: var(--skyblue);
     margin-bottom: 0.5rem;
     width: 100%;
     height: 80px;
-    padding: 8px;
+    padding: 12px;
     border-radius: .25rem;
 }
 .symbols-summary {
@@ -212,21 +214,20 @@ body {
     width: 100%;
 }
 
-@media screen and (min-width: 45rem) {
+@media screen and (min-width: 50rem) {
     .container {
         display: grid;
         grid-template-areas:
             "summary content"
             "list content";
-        grid-template-columns: minmax(24rem, 30%) auto;
+        grid-template-columns: minmax(25rem, 30%) minmax(25rem,70%);
         grid-column-gap: 0.5rem;
         width: 100%;
         overflow-y: auto;
     }
     .summary {
         grid-area: summary;
-        color: white;
-        padding: 8px;
+        padding: 12px;
         margin-bottom: 0.5rem;
     }
     .main-content {
@@ -238,7 +239,7 @@ body {
     .side-list {
         grid-area: list;
         left: 0;
-        top: 4.5rem;
+        top: 85px;
         overflow-y: auto;
     }
 }
