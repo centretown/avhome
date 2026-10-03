@@ -14,13 +14,17 @@
 
 {{ define "weather" }}
 <!---->
-{{template "folder.header" "weather"}}
-<div id="weather-fold" class="folder-item hide">
-    {{template "sub.header" "Hourly Detail"}}
-    <div id="Hourly Detail-fold" class="folder-item">
+{{template "folder.header" "Weather"}}
+<div id="Weather-fold" class="folder-item hide">
+    {{template "sub.header" "Hourly Forcast"}}
+    <div id="Hourly Forcast-fold" class="folder-item">
         {{template "weather.hourly.detail" .Weather.Location}}
     </div>
-</div>
+    {{template "sub.header" "Daily Forcast"}}
+    <div id="Daily Forcast-fold" class="folder-item">
+        {{template "weather.daily.detail" .Weather.Location}}
+    </div>
+ </div>
 <!--  -->
 {{ end }}
 <!---->

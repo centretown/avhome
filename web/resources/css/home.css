@@ -9,10 +9,11 @@ body {
     --bgSemiTransparent: rgba(0, 0, 0, 0.375);
     --bgH3: rgba(0, 0, 0, 0.3);
     --skyblue: rgba(132, 207, 238, 1);
-    --bgFolder: rgba(100, 156, 175, 1);
-    --bgSubFolder: rgba(50, 78, 89, 1);
     --bgItem: rgba(37, 50, 60, 1);
+    --bgFolder: rgba(100, 156, 175, 1);
     --fgFolder: rgba(0, 0, 0, 1);
+    --bgSubFolder: rgba(75, 105, 115, 1);
+    --fgSubFolder: rgba(100, 211, 211, 1);
     --fgIcon: rgba(0, 0, 0, 1);
 
     --fgBright: rgba(165, 208, 198, 1);
@@ -106,13 +107,6 @@ body {
     width: 2rem;
 }
 
-.actions {
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    overflow: hidden;
-}
-
 .hide {
     display: none;
 }
@@ -121,35 +115,23 @@ body {
     border-radius: 0.35rem;
 }
 
-.action {
-    margin: 0.5rem;
-    border-radius: 0.35rem;
-    opacity: 0.5;
-    color: var(--fgDim);
-    background-color: var(--bgTransparent);
-    width: 5rem;
-}
-
-.action:focus,
-.action:hover {
-    opacity: 1;
-    background-color: var(--bgOpaque);
-    color: var(--fgBright);
-}
-
 .video {
     width: 100%;
 }
 .sub-header {
-    margin-bottom: 0.3rem;
+    display: grid;
+    grid-template-columns: auto auto auto;
+    justify-content: space-between;
     cursor: default;
     background-color: var(--bgSubFolder);
     border-radius: 0.25rem;
+    margin-bottom: 0.2rem;
 }
 .sub-text {
     font-size: 1rem;
     font-weight: bold;
-    color: var(--fgFolder);
+    color: var(--skyblue);
+    align-self: center;
 }
 .folder-header {
     display: grid;
@@ -159,31 +141,34 @@ body {
     cursor: default;
     background-color: var(--bgFolder);
     border-radius: 0.25rem;
-    width: 100%;
 }
 .folder-text {
     font-size: 1.5rem;
     font-weight: bold;
     color: var(--fgFolder);
-    padding: .5rem;
+    align-self: center;
+    padding: 0.5rem;
 }
 .folder-item {
     background-color: var(--bgItem);
     border-radius: 0.25rem;
     margin-bottom: 0.3rem;
 }
+.folder-spacer-right,
 .folder-icon-right,
 .folder-icon {
-    width: 8rem;
+    width: 6rem;
     color: var(--fgIcon);
     text-align: center;
     border-radius: 0.25rem;
 }
-.folder-icon:hover{
-    border-right: .2rem solid;
+.folder-icon:hover {
+    /*border-right: .2rem solid;*/
+    background-color: var(--bgSemiTransparent);
 }
 .folder-icon-right:hover {
-    border-left: .2rem solid;
+    /*border-left: .2rem solid;*/
+    background-color: var(--bgSemiTransparent);
 }
 .message {
     position: absolute;

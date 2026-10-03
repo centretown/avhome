@@ -13,7 +13,7 @@
 </div>
 
 <div id="side-list" class="side-list" style="height: getListHeight()">
-    <div id="section-weather" class="round">{{template "weather" .}}</div>
+    <div id="section-Weather" class="round">{{template "weather" .}}</div>
     <!---->
     {{range $i, $camera := .Paths.Items}}
     <!---->
@@ -61,7 +61,7 @@
         class="symbols folder-icon-right"
         hx-on:click="swapContentVideo('section-{{.}}');"
         hx-swap="none"
-        >swap_horiz</span
+        >keyboard_arrow_right</span
     >
 </div>
 {{end}}
@@ -69,14 +69,17 @@
 
 <!---->
 {{define "sub.header"}}
-<div
-    id="{{.}}-header"
-    class="sub-header"
-    hx-on:click="toggle_fold('{{.}}-fold','{{.}}-icon')"
->
-    <span id="{{.}}-icon" class="symbols-title folder-icon"
+<div id="{{.}}-header" class="sub-header">
+    <span
+        id="{{.}}-icon"
+        class="symbols folder-icon"
+        hx-on:click="toggle_fold('{{.}}-fold','{{.}}-icon')"
+        hx-swap="none"
         >arrow_drop_down</span
-    ><span class="sub-text">{{.}}</span>
+    >
+    <!---->
+    <span class="sub-text">{{.}}</span>
+    <span class="folder-spacer-right"></span>
 </div>
 {{end}}
 <!---->

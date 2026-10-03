@@ -146,8 +146,14 @@ func Run() {
 			}
 			if now.Minute() == 0 {
 				rt.QueryHourly()
+				// t := httpTemplate.Lookup("weather.hourly.detail")
+				// t.Execute(&buf, rt.Location)
+				// sockServer.Broadcast(buf.String())
 				if now.Hour()%4 == 0 {
 					rt.QueryDaily()
+					// t := httpTemplate.Lookup("weather.daily.detail")
+					// t.Execute(&buf, rt.Location)
+					// sockServer.Broadcast(buf.String())
 				}
 			}
 
