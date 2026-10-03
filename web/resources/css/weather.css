@@ -1,4 +1,3 @@
-
 .windspeed {
     color: rgba(255, 218, 185, 255);
 }
@@ -61,4 +60,82 @@
     font-size: 0.7rem;
     background-color: var(--bgTransparent);
     color: var(--fgOut);
+}
+
+.grid-entity,
+.grid-home,
+.grid-container,
+.grid-day,
+.grid-hour,
+.grid-icon,
+.grid-icon24,
+.grid-sun,
+.grid-hourly,
+.grid-daily {
+    font-size: 0.7rem;
+    display: grid;
+    grid-template-columns: 4rem 4rem 8rem 3rem;
+    justify-content: center;
+}
+
+.grid-day {
+    justify-content: left;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+.grid-icon,
+.grid-icon24,
+.grid-hour {
+    padding-bottom: 2px;
+    justify-content: left;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+.grid-icon24 {
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+.grid-hourly {
+    padding-bottom: 0.2rem;
+    grid-template-columns: 1.5rem 4rem 3rem 3rem 3rem 3rem 3rem;
+}
+.grid-daily {
+    padding-bottom: 0.2rem;
+    grid-template-columns: 1fr 3fr 2fr 2fr 2fr;
+}
+.grid-sun {
+    padding-bottom: 0.2rem;
+    grid-template-columns: 1.5rem 4.5rem 4rem 4rem 3.6rem;
+}
+
+.grid-label {
+    font-size: 0.75rem;
+    background-color: var(--bgTransparent);
+    color: var(--fgBright);
+}
+
+.weather-summary-date {
+    margin-left: 0.5rem;
+    font-size: 1rem;
+    color: var(--fgBright);
+}
+
+.weather-item-icon {
+    grid-area: icon;
+    text-align: center;
+    align-content: center;
+}
+
+.weather-summary-item {
+    font-weight: normal;
+    font-size: 0.8rem;
+    color: white;
+}
+
+.weather-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    margin-bottom: 0.5rem;
+    margin-left: 1rem;
+    margin-bottom: 1rem;
 }

@@ -92,7 +92,7 @@ func Run() {
 	})
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Print(r.Host)
+		log.Print("root", r.Host)
 		if strings.HasPrefix(r.Host, "192.168.10") {
 			webRun.MtxUrl = "192.168.10.7"
 		} else if strings.HasPrefix(r.Host, "10.0.0") {
@@ -101,7 +101,10 @@ func Run() {
 		refreshTemplate()
 		mainTmpl := httpTemplate.Lookup("main")
 		w.WriteHeader(http.StatusOK)
-		mainTmpl.Execute(w, webRun)
+		err := mainTmpl.Execute(w, webRun)
+		if err != nil {
+			log.Printf("failed to create html template: %v\n", err)
+		}
 	})
 	mux.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)

@@ -1,17 +1,19 @@
 * {
     box-sizing: border-box;
-    scrollbar-width: thin;
+    scrollbar-width: none;
 }
 
 body {
     --bgOpaque: rgba(31, 63, 63, 1);
-    --bgTransparent: rgba(0, 0, 0, 0);
+    --bgTransparent: rgba(0, 0, 0, 0.375);
     --bgSemiTransparent: rgba(0, 0, 0, 0.375);
-    --bgH3: rgba(0, 127, 255, 0.15);
+    --bgH3: rgba(0, 0, 0, 0.3);
     --skyblue: rgba(132, 207, 238, 1);
-    --bgFolder: rgba(85, 135, 153, 1);
+    --bgFolder: rgba(100, 156, 175, 1);
+    --bgSubFolder: rgba(50, 78, 89, 1);
+    --bgItem: rgba(37, 50, 60, 1);
     --fgFolder: rgba(0, 0, 0, 1);
-    --fgIcon: rgba(211, 255, 255, 1);
+    --fgIcon: rgba(0, 0, 0, 1);
 
     --fgBright: rgba(165, 208, 198, 1);
     --fgSelected: rgba(200, 255, 240, 1);
@@ -95,7 +97,7 @@ body {
     cursor: pointer;
 }
 .symbols-title {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
 }
 
 .symbols-form {
@@ -111,8 +113,16 @@ body {
     overflow: hidden;
 }
 
+.hide {
+    display: none;
+}
+
+.round {
+    border-radius: 0.35rem;
+}
+
 .action {
-    margin-left: 0.5rem;
+    margin: 0.5rem;
     border-radius: 0.35rem;
     opacity: 0.5;
     color: var(--fgDim);
@@ -130,19 +140,51 @@ body {
 .video {
     width: 100%;
 }
-.folder-header {
+.sub-header {
     margin-bottom: 0.3rem;
     cursor: default;
-    background-color: var(--bgFolder);
-    border-radius: .25rem;
-
+    background-color: var(--bgSubFolder);
+    border-radius: 0.25rem;
 }
-.folder-text {
-    font-size: 1.3rem;
+.sub-text {
+    font-size: 1rem;
     font-weight: bold;
     color: var(--fgFolder);
 }
-
+.folder-header {
+    display: grid;
+    grid-template-columns: auto auto auto;
+    justify-content: space-between;
+    margin-bottom: 0.3rem;
+    cursor: default;
+    background-color: var(--bgFolder);
+    border-radius: 0.25rem;
+    width: 100%;
+}
+.folder-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--fgFolder);
+    padding: .5rem;
+}
+.folder-item {
+    background-color: var(--bgItem);
+    border-radius: 0.25rem;
+    margin-bottom: 0.3rem;
+}
+.folder-icon-right,
+.folder-icon {
+    width: 8rem;
+    color: var(--fgIcon);
+    text-align: center;
+    border-radius: 0.25rem;
+}
+.folder-icon:hover{
+    border-right: .2rem solid;
+}
+.folder-icon-right:hover {
+    border-left: .2rem solid;
+}
 .message {
     position: absolute;
     top: 20px;
@@ -186,21 +228,21 @@ body {
     width: 100%;
     height: 80px;
     padding: 12px;
-    border-radius: .25rem;
+    border-radius: 0.25rem;
 }
 .symbols-summary {
-    font-size: 3rem;
+    font-size: 4rem;
 }
 .summary-icon {
     align-self: center;
     text-align: center;
 }
 .summary-clock {
-    font-size: 2rem;
+    font-size: 1.75rem;
     align-self: left;
 }
 .summary-temperature {
-    font-size: 2rem;
+    font-size: 1.75rem;
     align-self: right;
     text-align: right;
 }
@@ -220,7 +262,7 @@ body {
         grid-template-areas:
             "summary content"
             "list content";
-        grid-template-columns: minmax(25rem, 30%) minmax(25rem,70%);
+        grid-template-columns: minmax(25rem, 30%) minmax(25rem, 70%);
         grid-column-gap: 0.5rem;
         width: 100%;
         overflow-y: auto;
@@ -233,7 +275,7 @@ body {
     .main-content {
         grid-area: content;
         width: 100%;
-        /*height: 100vh;*/
+        height: 100vh;
         overflow-y: auto;
     }
     .side-list {

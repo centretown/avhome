@@ -15,9 +15,11 @@
 {{ define "weather" }}
 <!---->
 {{template "folder.header" "weather"}}
-<div id="weather-fold" class="w3-margin-bottom w3-hide">
-    <div>hello weather</div>
-    {{template "button.swap" "weather"}}
+<div id="weather-fold" class="folder-item hide">
+    {{template "sub.header" "Hourly Detail"}}
+    <div id="Hourly Detail-fold" class="folder-item">
+        {{template "weather.hourly.detail" .Weather.Location}}
+    </div>
 </div>
 <!--  -->
 {{ end }}
@@ -36,10 +38,10 @@
         {{$cur.Temperature}}{{$units.Temperature}}
         <!--<span> {{$cur.Precipitation}} {{$units.Precipitation}} </span>-->
     </div>
+    <script>
+        startClock();
+    </script>
 </div>
-<script>
-    startClock();
-</script>
 {{ end }}
 <!--  -->
 {{ define "location.weather" }}

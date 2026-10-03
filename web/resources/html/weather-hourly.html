@@ -1,0 +1,35 @@
+{{ define "weather.hourly.detail" }}
+<!--  -->
+{{$location:=.}}{{$w:=.WeatherHourly}}
+<!--  -->
+{{range $hourlyIndex,$time:=$w.Hourly.Time}}
+<!--  -->
+{{$c:=index $w.Hourly.Code $hourlyIndex}} {{$code:=$w.WeatherCode $c}}
+<div class="weather-summary-date">
+    <span
+        class="symbols-weather-medium weather-item-icon"
+        style="color:{{$code.Color}}; font-size:1rem"
+    >
+        {{$code.Icon}}
+    </span>
+    {{$w.WeatherCommon.FormatTime $time }}
+</div>
+{{$props:=$location.HourlyProperties}}
+<div id="hourly-detail-{{$location.ID}}" class="weather-summary">
+    {{range $index, $item:=$props.Items}}
+    <span id="hourly-detail-item-{{$item.ID}}">
+        <span class="symbols-weather-medium {{$item.Klass}}">
+            {{$item.Icon}}
+        </span>
+        <span class="weather-summary-item"
+            >{{index $item.Values $hourlyIndex}}{{$item.Units}}</span
+        >
+    </span>
+    <!--  -->
+    {{end}}
+</div>
+<!--  -->
+<!--  -->
+{{ end }}
+<!--  -->
+{{ end }}

@@ -41,7 +41,7 @@ function startClock() {
   setTimeout(startClock, 1000 * (60 - today.getSeconds()));
 }
 
-const w3_hide = "w3-hide";
+const w3_hide = "hide";
 const icon_down = "arrow_drop_down";
 const icon_right = "arrow_right";
 const element_not_found = "element not found";
