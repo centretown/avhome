@@ -1,39 +1,3 @@
-{{ define "weather.hourly.detail" }}
-<!--  -->
-{{$location:=.}}{{$w:=.WeatherHourly}}
-<!--  -->
-{{range $hourlyIndex,$time:=$w.Hourly.Time}}
-<!--  -->
-{{$c:=index $w.Hourly.Code $hourlyIndex}} {{$code:=$w.WeatherCode $c}}
-<div class="weather-summary-date">
-    <span
-        class="symbols-weather-medium weather-item-icon"
-        style="color:{{$code.Color}}; font-size:1rem"
-    >
-        {{$code.Icon}}
-    </span>
-    {{$w.WeatherCommon.FormatTime $time }}
-</div>
-{{$props:=$location.HourlyProperties}}
-<div id="hourly-detail-{{$location.ID}}" class="weather-summary">
-    {{range $index, $item:=$props.Items}}
-    <span id="hourly-detail-item-{{$item.ID}}">
-        <span class="symbols-weather-medium {{$item.Klass}}">
-            {{$item.Icon}}
-        </span>
-        <span class="weather-summary-item"
-            >{{index $item.Values $hourlyIndex}}{{$item.Units}}</span
-        >
-    </span>
-    <!--  -->
-    {{end}}
-</div>
-<!--  -->
-<!--  -->
-{{ end }}
-<!--  -->
-{{ end }}
-
 {{ define "weather.daily.detail" }}
 <!--  -->
 {{$location:=.}}{{$w:=.WeatherDaily}}
@@ -68,4 +32,47 @@
 {{ end }}
 <!--  -->
 {{ end }}
+<!--  -->
+
+<!--  -->
+{{ define "weather.current.history" }}
+<!--  -->
+{{$location:=.}}{{$w:=.WeatherCurrent}}
+<!--  -->
+{{$props:=.CurrentProperties}}
+<!--  -->
+{{$count:=len $props.Time}} {{$count:=sub $count 1}}{{range
+$no,$rec:=$props.Time}}
+<!--  -->
+{{$recno:=sub $count $no}}
+<!--  -->
+{{$pcode:=index $props.Code $recno}} {{$code:=$w.WeatherCode $pcode}}
+<div class="weather-summary-date">
+    <span
+        class="symbols-weather-medium item-icon"
+        style="color:{{$code.Color}}; font-size:1rem"
+    >
+        {{$code.Icon}}
+    </span>
+    {{$time:=index $props.Time $recno}} {{$location.WeatherCurrent.FormatTime
+    $time}}
+</div>
+
+<div id="current-{{$location.ID}}" class="weather-summary">
+    {{range $item:=$props.Items}}
+    <!--  -->
+    <span id="current-item-{{$item.ID}}">
+        <span class="symbols-weather-medium {{$item.Klass}}">
+            {{$item.Icon}}
+        </span>
+        <span class="weather-summary-item"
+            >{{index $item.Values $recno}}{{$item.Units}}</span
+        >
+    </span>
+    <!--  -->
+    {{end}}
+</div>
+{{end}}
+<!--  -->
+{{end}}
 <!--  -->

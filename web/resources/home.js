@@ -8,9 +8,9 @@ function swapClass(id, klass1) {
   return;
 }
 
-function swapContentVideo(id) {
+function swapContent(id) {
   let element = document.getElementById(id);
-  if (element === undefined) {
+  if (element === undefined || element == null) {
     console.log(id, "undefined");
     return;
   }
@@ -67,4 +67,14 @@ function get_folded(id) {
     return icon_right;
   }
   return icon_down;
+}
+
+function showFullDate(dt) {
+  let options = {
+    timeStyle: "short",
+    dateStyle: "full",
+    timeZone: "America/New_York",
+  };
+  let fmt = new Intl.DateTimeFormat("en-US", options);
+  return fmt.format(dt);
 }

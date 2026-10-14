@@ -1,11 +1,12 @@
-{{ define "main.view" }}
+{{ define "main.view" }} {{$rt:=.}}
 <!---->
-{{template "current.summary" .Weather}}
+{{template "current.summary" .}}
 <!---->
 {{$content:=index .Paths.Items 1}}
+{{$section:=index $rt.Sections 1}}
 <div id="main-content" class="main-content">
-    <div id="section-{{$content.Name}}" class="round">
-        {{template "folder.header" $content.Name}}
+    <div id="{{$section.Name}}" class="round">
+        {{template "folder.header" $section}}
         <!---->
         {{template "camera.video" $content}}
         <!---->
@@ -13,18 +14,19 @@
 </div>
 
 <div id="side-list" class="side-list" style="height: getListHeight()">
-    <div id="section-Weather" class="round">{{template "weather" .}}</div>
-    <!---->
     {{range $i, $camera := .Paths.Items}}
     <!---->
     {{if (ne $i 1)}}
-    <div id="section-{{$camera.Name}}" class="round">
-        {{template "folder.header" $camera.Name}}
+    {{$section:=index $rt.Sections $i}}
+    <div id="{{$section.Name}}" class="round">
+        {{template "folder.header" $section}}
         <!---->
         {{template "camera.video" $camera}}
         <!---->
     </div>
-    {{end}} {{end}}
+    {{end}}
+    {{end}}
+    <div id="weather" class="round">{{template "weather" .Weather}}</div>
 </div>
 <!---->
 {{end}}
@@ -48,18 +50,18 @@
 <!---->
 <!---->
 {{define "folder.header"}}
-<div id="{{.}}-header" class="folder-header">
+<div id="{{.Name}}-header" class="folder-header">
     <span
-        id="{{.}}-icon"
+        id="{{.Name}}-icon"
         class="symbols folder-icon"
-        hx-on:click="toggle_fold('{{.}}-fold','{{.}}-icon')"
+        hx-on:click="toggle_fold('{{.Name}}-fold','{{.Name}}-icon')"
         hx-swap="none"
         >arrow_drop_down</span
     >
-    <span class="folder-text">{{.}}</span>
+    <span class="folder-text">{{.Title}}</span>
     <span
         class="symbols folder-icon-right"
-        hx-on:click="swapContentVideo('section-{{.}}');"
+        hx-on:click="swapContent('{{.Name}}');"
         hx-swap="none"
         >keyboard_arrow_right</span
     >
@@ -67,18 +69,34 @@
 {{end}}
 <!---->
 
+{{define "header.spans"}}
+<span
+    id="{{.}}-icon"
+    class="symbols folder-icon"
+    hx-on:click="toggle_fold('{{.}}-fold','{{.}}-icon')"
+    hx-swap="none"
+    >arrow_drop_down</span
+>
+<!---->
+{{end}}
+<!---->
+
+{{define "mid.header"}}
+<div id="{{.Name}}-header" class="mid-header">
+    <!---->
+    {{template "header.spans" .Name}}
+    <span class="mid-text">{{.Title}}</span>
+    <span class="folder-spacer-right"></span>
+</div>
+{{end}}
+<!---->
+
 <!---->
 {{define "sub.header"}}
-<div id="{{.}}-header" class="sub-header">
-    <span
-        id="{{.}}-icon"
-        class="symbols folder-icon"
-        hx-on:click="toggle_fold('{{.}}-fold','{{.}}-icon')"
-        hx-swap="none"
-        >arrow_drop_down</span
-    >
+<div id="{{.Name}}-header" class="sub-header hide">
     <!---->
-    <span class="sub-text">{{.}}</span>
+    {{template "header.spans" .Name}}
+    <span class="sub-text">{{.Title}}</span>
     <span class="folder-spacer-right"></span>
 </div>
 {{end}}

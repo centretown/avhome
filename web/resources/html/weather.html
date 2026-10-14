@@ -14,23 +14,49 @@
 
 {{ define "weather" }}
 <!---->
-{{template "folder.header" "Weather"}}
-<div id="Weather-fold" class="folder-item hide">
-    {{template "sub.header" "Hourly Forcast"}}
-    <div id="Hourly Forcast-fold" class="folder-item">
-        {{template "weather.hourly.detail" .Weather.Location}}
+{{template "folder.header" .Section}}
+<div id="{{.Section.Name}}-fold" class="folder-item hide">
+    {{$sections:=.Sections}}
+    <!---->
+    {{range $i, $loc:=.Locations}} {{$section:=index $sections $i}}
+    <!---->
+    {{template "mid.header" $section}}
+    <!---->
+    <div id="{{$section.Name}}-fold" class="folder-item">
+        {{template "weather.current" $loc}}
+        {{$sub0:=index $section.Sections 0}}
+        {{template "sub.header" $sub0}}
+        <div id="{{$sub0.Name}}-fold" class="hide">
+            {{template "weather.current.history" .}}
+        </div>
+        <div class="vspace"></div>
+        <!---->
+        {{template "weather.hourly" $loc}}
+        {{$sub1:=index $section.Sections 1}}
+        {{template "sub.header" $sub1}}
+        <div id="{{$sub1.Name}}-fold" class="hide">
+            {{template "weather.hourly.detail" .}}
+        </div>
+        <div class="vspace"></div>
+        <!---->
+        {{$sub2:=index $section.Sections 2}}
+        {{template "sub.header" $sub2}}
+        <div id="{{$sub2.Name}}-fold" class="hide">
+            {{template "weather.daily.detail" $loc}}
+        </div>
+        <div class="vspace"></div>
+        <!---->
     </div>
-    {{template "sub.header" "Daily Forcast"}}
-    <div id="Daily Forcast-fold" class="folder-item">
-        {{template "weather.daily.detail" .Weather.Location}}
-    </div>
- </div>
+    {{ end }}
+</div>
 <!--  -->
 {{ end }}
 <!---->
+<!---->
 {{ define "current.summary" }}
+<!---->
 <div id="summary" class="summary" hx-swap-oob="outerHTML">
-    {{$w:=.Location.WeatherCurrent}}{{$cur:=$w.Current}}{{$units:=$w.CurrentUnits}}
+    {{$w:=.Weather.Location.WeatherCurrent}}{{$cur:=$w.Current}}{{$units:=$w.CurrentUnits}}
     <!--  -->
     {{$code:=$w.WeatherCode $cur.Code}}
     <!--  -->

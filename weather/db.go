@@ -112,7 +112,6 @@ func InsertHistory(db *sqlx.DB, ID uint64, current *Current) (err error) {
 const (
 	fmtSelectHistory   = "SELECT * FROM history WHERE Time>'%s' AND Time<='%s' ORDER BY LocationID, Time;"
 	fmtLocationHistory = "SELECT * FROM history WHERE LocationID=%d AND Time>'%s' AND Time<='%s' ORDER BY Time %s;"
-	timeLayout         = "2006-01-02T15:04"
 	fmtSelectLocation  = "SELECT * FROM location;"
 )
 
@@ -130,19 +129,20 @@ func SelectHistory(db *sqlx.DB, query string) (history []*Current, err error) {
 	}
 
 	for rows.Next() {
-		var current = &Current{}
-		err = rows.StructScan(current)
+		var current Current
+		err = rows.StructScan(&current)
 		if err != nil {
 			log.Println(err)
 			return
 		} else {
-			history = append(history, current)
+			history = append(history, &current)
 		}
 	}
 	return
 }
 
 func SelectLocations(db *sqlx.DB) (locations []*Location, err error) {
+	locations = make([]*Location, 0)
 	var rows *sqlx.Rows
 	rows, err = db.Queryx(fmtSelectLocation)
 	if err != nil {
@@ -162,9 +162,16 @@ func SelectLocations(db *sqlx.DB) (locations []*Location, err error) {
 	}
 	return
 }
+func AfterBeforeTime(t time.Time, d time.Duration, minuteInterval int) (after time.Time, before time.Time) {
+	min := t.Minute() % minuteInterval
+	before = t.Add(time.Minute * time.Duration(-min))
 
-func BeforeTime(t time.Time, d time.Duration) (after string, before string) {
-	before = t.Format(timeLayout)
-	after = t.Add(-d).Format(timeLayout)
+	after = before.Add(-d)
+	return
+}
+
+func AfterBeforeString(t time.Time, d time.Duration, minuteInterval int) (after string, before string) {
+	tmAfter, tmBefore := AfterBeforeTime(t, d, HISTORY_MINUTE_INTERVAL)
+	before, after = tmBefore.Format(TIME_LAYOUT), tmAfter.Format(TIME_LAYOUT)
 	return
 }

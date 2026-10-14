@@ -10,6 +10,11 @@ type Limits struct {
 	Max float64
 }
 
+type ServiceError struct {
+	Reason string `json:"reason"`
+	Error  bool   `json:"error"`
+}
+
 type WeatherCommon struct {
 	Latitude             float64   `json:"latitude"`
 	Longitude            float64   `json:"longitude"`
@@ -24,19 +29,19 @@ type WeatherCommon struct {
 type WeatherHourly struct {
 	WeatherCommon
 	HourlyUnits HourlyUnits `json:"hourly_units"`
-	Hourly      *Hourly     `json:"hourly"`
+	Hourly      Hourly      `json:"hourly"`
 }
 
 type WeatherDaily struct {
 	WeatherCommon
 	DailyUnits DailyUnits `json:"daily_units"`
-	Daily      *Daily     `json:"daily"`
+	Daily      Daily      `json:"daily"`
 }
 
 type WeatherCurrent struct {
 	WeatherCommon
 	CurrentUnits CurrentUnits `json:"current_units"`
-	Current      *Current     `json:"current"`
+	Current      Current      `json:"current"`
 }
 
 type CurrentUnits struct {
@@ -83,6 +88,8 @@ type Current struct {
 const (
 	HISTORY_INTERVALS       = 24
 	HISTORY_MINUTE_INTERVAL = 15
+	HISTORY_DURATION        = time.Minute * HISTORY_MINUTE_INTERVAL * HISTORY_INTERVALS
+	TIME_LAYOUT             = "2006-01-02T15:04"
 )
 
 type CurrentValues struct {
@@ -205,7 +212,7 @@ func (w *WeatherCommon) FormatTimeCurrent(times []string) (intervals []string) {
 		if index%4 != 0 {
 			continue
 		}
-		t, err := time.Parse("2006-01-02T15:04", timestr)
+		t, err := time.Parse(TIME_LAYOUT, timestr)
 		if err != nil {
 			log.Printf("FormatTime: %v\n", err)
 		}
@@ -216,7 +223,7 @@ func (w *WeatherCommon) FormatTimeCurrent(times []string) (intervals []string) {
 }
 
 func (w *WeatherCommon) FormatTime(timeStr string) string {
-	t, err := time.Parse("2006-01-02T15:04", timeStr)
+	t, err := time.Parse(TIME_LAYOUT, timeStr)
 	if err != nil {
 		log.Printf("FormatTime: %v\n", err)
 	}
@@ -227,7 +234,7 @@ func (w *WeatherHourly) Hours() (hours []time.Time) {
 	hours = make([]time.Time, 0, len(w.Hourly.Time)/4)
 	for i := range w.Hourly.Time {
 		if i%4 == 0 {
-			t, _ := time.Parse("2006-01-02T15:04", w.Hourly.Time[i])
+			t, _ := time.Parse(TIME_LAYOUT, w.Hourly.Time[i])
 			hours = append(hours, t)
 		}
 	}

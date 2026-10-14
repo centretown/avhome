@@ -2,8 +2,27 @@ package weather
 
 import (
 	"fmt"
+	"log"
 	"math"
 )
+
+type Location struct {
+	ID                uint64              `json:"-" db:"ID"`
+	City              string              `json:"city" db:"City"`
+	Latitude          float64             `json:"latitude" db:"Latitude"`
+	Longitude         float64             `json:"longitude" db:"Longitude"`
+	Zone              string              `json:"zone" db:"Zone"`
+	WeatherDaily      *WeatherDaily       `json:"-"`
+	DailyProperties   *LocationProperties `json:"-"`
+	WeatherHourly     *WeatherHourly      `json:"-"`
+	HourlyProperties  *LocationProperties `json:"-"`
+	WeatherCurrent    *WeatherCurrent     `json:"-"`
+	CurrentProperties *LocationProperties `json:"-"`
+}
+
+func NewLocation() *Location {
+	return &Location{}
+}
 
 type CurrentProperty struct {
 	ID          string
@@ -12,8 +31,6 @@ type CurrentProperty struct {
 	Klass       string
 	Min         float64
 	Max         float64
-	ScaleMin    float64
-	ScaleMax    float64
 	Icon        string
 	Color       string
 	Units       string
@@ -29,23 +46,9 @@ type LocationProperty struct {
 
 type LocationProperties struct {
 	Index int
-	Items []*LocationProperty
+	Items []LocationProperty
 	Code  []int32
 	Time  []string
-}
-
-type Location struct {
-	ID                uint64              `json:"-" db:"ID"`
-	City              string              `json:"city" db:"City"`
-	Latitude          float64             `json:"latitude" db:"Latitude"`
-	Longitude         float64             `json:"longitude" db:"Longitude"`
-	Zone              string              `json:"zone" db:"Zone"`
-	WeatherDaily      *WeatherDaily       `json:"-"`
-	DailyProperties   *LocationProperties `json:"-"`
-	WeatherHourly     *WeatherHourly      `json:"-"`
-	HourlyProperties  *LocationProperties `json:"-"`
-	WeatherCurrent    *WeatherCurrent     `json:"-"`
-	CurrentProperties *LocationProperties `json:"-"`
 }
 
 var (
@@ -85,35 +88,58 @@ var (
 	}
 )
 
-func (loc *Location) BuildCurrentProperties(history []*Current) {
-	p := &LocationProperties{}
-	loc.CurrentProperties = p
-	p.Items = make([]*LocationProperty, len(currentAttributes))
-	p.Code = make([]int32, len(history))
-	p.Time = make([]string, len(history))
-	limits := make(map[string]*Limits)
+const (
+	weatherFormat  = "%s?latitude=%.2f&longitude=%.2f&timezone=%s%s&models=gem_seamless"
+	weatherHeader  = "https://api.open-meteo.com/v1/forecast"
+	dailyTrailer   = "&daily=sunrise,sunset,temperature_2m_max,temperature_2m_min,daylight_duration,sunshine_duration,precipitation_sum,precipitation_probability_max,weather_code,wind_speed_10m_max,wind_direction_10m_dominant,wind_gusts_10m_max"
+	hourlyTrailer  = "&hourly=temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,relative_humidity_2m,surface_pressure,&forecast_hours=24"
+	currentTrailer = "&current=temperature_2m,precipitation,relative_humidity_2m,apparent_temperature,is_day,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,rain,showers,cloud_cover,pressure_msl,surface_pressure,snowfall"
+)
+
+func (loc *Location) DailyQuery() string {
+	return fmt.Sprintf(weatherFormat, weatherHeader, loc.Latitude, loc.Longitude, loc.Zone, dailyTrailer)
+}
+
+func (loc *Location) CurrentQuery() string {
+	return fmt.Sprintf(weatherFormat, weatherHeader, loc.Latitude, loc.Longitude, loc.Zone, currentTrailer)
+}
+
+func (loc *Location) HourlyQuery() string {
+	return fmt.Sprintf(weatherFormat, weatherHeader, loc.Latitude, loc.Longitude, loc.Zone, hourlyTrailer)
+}
+
+func (loc *Location) BuildCurrentProperties(history []Current) {
+	if len(history) < 1 {
+		log.Print("BuildCurrentProperties: No History!")
+		return
+	}
+
+	var p *LocationProperties = loc.CurrentProperties
+	p.Items = make([]LocationProperty, len(currentAttributes))
+	p.Code = make([]int32, HISTORY_INTERVALS)
+	p.Time = make([]string, HISTORY_INTERVALS)
+
 	for recno, rec := range history {
 		p.Time[recno] = rec.Time
 		p.Code[recno] = rec.Code
 	}
+
 	for i, key := range currentAttributes {
-		item := &LocationProperty{}
-		p.Items[i] = item
+		item := &p.Items[i]
 		attr := Attributes[key]
 		attr.ToItem(&item.CurrentProperty)
 		item.Values = make([]float64, len(history))
 		item.Units = CurrentUnit(key, &loc.WeatherCurrent.CurrentUnits)
 		item.Klass = key
 		item.ID = fmt.Sprintf("%s%d", key, loc.ID)
+		// FIXME
 		for recno, rec := range history {
-			item.Values[recno] = CurrentValue(key, rec)
+			item.Values[recno] = CurrentValue(key, &rec)
 		}
 		mnx := loc.WeatherCurrent.MinMax(item.Values)
 		item.Max = mnx.Max
 		item.Min = mnx.Min
-		p.BuildScale(limits, &mnx, item.Units)
 	}
-	p.Scale(limits)
 }
 
 func CurrentValue(key string, values *Current) (value float64) {
@@ -177,19 +203,14 @@ func CurrentUnit(key string, units *CurrentUnits) (unit string) {
 }
 
 func (loc *Location) BuildDailyProperties() {
-	p := &LocationProperties{}
-	loc.DailyProperties = p
+	p := loc.DailyProperties
 	p.Index = int(loc.ID)
-	p.Items = make([]*LocationProperty, len(dailyAttributes))
+	p.Items = make([]LocationProperty, len(dailyAttributes))
 	p.Code = loc.WeatherDaily.Daily.Code
-	limits := make(map[string]*Limits)
 	for i, key := range dailyAttributes {
-		item := &LocationProperty{}
-		p.Items[i] = item
-
+		item := &p.Items[i]
 		item.ID = fmt.Sprintf("%s%d", key, int(loc.ID))
 		item.Klass = key
-
 		attr := Attributes[key]
 		attr.ToItem(&item.CurrentProperty)
 		values := loc.WeatherDaily.Daily
@@ -231,29 +252,20 @@ func (loc *Location) BuildDailyProperties() {
 		mnx := loc.WeatherDaily.MinMax(item.Values)
 		item.Max = mnx.Max
 		item.Min = mnx.Min
-		p.BuildScale(limits, &mnx, item.Units)
 	}
 
-	p.Scale(limits)
 }
 
 func (loc *Location) BuildHourlyProperties() {
-	props := &LocationProperties{}
-	defer func() {
-		loc.HourlyProperties = props
-	}()
+	props := loc.HourlyProperties
 	props.Index = int(loc.ID)
-	props.Items = make([]*LocationProperty, len(hourlyAttributes))
-	props.Code = loc.WeatherHourly.Hourly.Code
-	limits := make(map[string]*Limits)
+	props.Items = make([]LocationProperty, len(hourlyAttributes))
 
 	values := loc.WeatherHourly.Hourly
 	units := loc.WeatherHourly.HourlyUnits
 
 	for i, key := range hourlyAttributes {
-		item := &LocationProperty{}
-		props.Items[i] = item
-
+		item := &props.Items[i]
 		item.ID = fmt.Sprintf("%s%d", key, loc.ID)
 		item.Klass = key
 
@@ -290,40 +302,5 @@ func (loc *Location) BuildHourlyProperties() {
 		mnx := loc.WeatherHourly.MinMax(item.Values)
 		item.Max = mnx.Max
 		item.Min = mnx.Min
-		props.BuildScale(limits, &mnx, item.Units)
-	}
-
-	props.Scale(limits)
-}
-
-func (p *LocationProperties) BuildScale(limits map[string]*Limits, mnx *Limits, units string) {
-	lim, ok := limits[units]
-	if !ok {
-		limits[units] = mnx
-	} else {
-		// log.Println(units, lim.Min, lim.Max)
-		if lim.Min > mnx.Min {
-			lim.Min = mnx.Min
-		}
-		if lim.Max < mnx.Max {
-			lim.Max = mnx.Max
-		}
-	}
-}
-
-func (p *LocationProperties) Scale(limits map[string]*Limits) {
-	for _, item := range p.Items {
-		lim, ok := limits[item.Units]
-		switch {
-		case !ok, item.Units == "%":
-			item.ScaleMax = 100.0
-			item.ScaleMin = 0.0
-		case item.Units == "hr":
-			item.ScaleMax = item.Max
-			item.ScaleMin = item.Min
-		default:
-			item.ScaleMax = lim.Max
-			item.ScaleMin = lim.Min
-		}
 	}
 }

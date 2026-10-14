@@ -1,13 +1,12 @@
 package weather
 
 import (
-	"avhome/action"
-	"avhome/socket"
 	"fmt"
-	"html/template"
 	"log"
-	"net/http"
+	"strings"
 	"time"
+
+	"avhome/section"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -16,68 +15,156 @@ type Runtime struct {
 	Location      *Location
 	Locations     []*Location
 	LocationIndex int
-	Actions       []*action.Action
-	ActionMap     map[string]*action.Action
+	SubSections   []*section.Section
+	Sections      []*section.Section
+	Section       *section.Section
 	retry         *time.Ticker
 	db            *sqlx.DB
-	mux           *http.ServeMux
 }
 
-func NewRuntime(mux *http.ServeMux, tmpl *template.Template, sock *socket.Server) (rt *Runtime) {
+const weather_section = "weather-section"
+
+func NewRuntime() (rt *Runtime) {
 	rt = &Runtime{
-		mux: mux,
-		Actions: []*action.Action{
-			{Name: "weather_current", Title: "Current Weather", Icon: "thunderstorm", Group: action.Home},
-			{Name: "weather_hourly", Title: "24 Hour Forecast", Icon: "schedule", Group: action.Home},
-			{Name: "weather_daily", Title: "7 Day Forecast", Icon: "calendar_view_week", Group: action.Home},
+		Section: &section.Section{
+			Name:   "weather",
+			Title:  "Weather",
+			Icon:   "thunderstorm",
+			Parent: weather_section,
 		},
-		ActionMap: make(map[string]*action.Action),
-	}
-	for _, action := range rt.Actions {
-		rt.ActionMap[action.Name] = action
+		Sections: make([]*section.Section, 0),
+		SubSections: []*section.Section{
+			{
+				Name:   "weather_current",
+				Title:  "Recent Conditions",
+				Icon:   "thunderstorm",
+				Parent: weather_section,
+			},
+			{
+				Name:   "weather_hourly",
+				Title:  "Hourly Forecast",
+				Icon:   "schedule",
+				Parent: weather_section,
+			},
+			{
+				Name:   "weather_daily",
+				Title:  "Daily Forecast",
+				Icon:   "calendar_view_week",
+				Parent: weather_section,
+			},
+		},
 	}
 	return
 }
 
-func (rt *Runtime) Connect() (err error) {
-	err = rt.ConnectLocationData()
+func (rt *Runtime) Connect(fname string) (err error) {
+	rt.db, err = OpenDB(fname)
 	if err != nil {
 		log.Print(err)
 		return
 	}
+	return
+}
 
+func (rt *Runtime) LoadLocations() (err error) {
 	rt.Locations, err = SelectLocations(rt.db)
 	if err != nil {
 		log.Print(err)
 		return
 	}
 
-	rt.Location = rt.Locations[0]
-	for _, l := range rt.Locations {
-		log.Printf("%v", l.City)
-	}
-	return
-}
-
-func (rt *Runtime) ConnectLocationData() (err error) {
-	rt.db, err = OpenDB("database/location.db")
-	if err != nil {
-		log.Print(err)
+	if len(rt.Locations) < 1 {
+		err = fmt.Errorf("No locations found.")
 		return
 	}
+
+	rt.Location = rt.Locations[0]
+	for _, l := range rt.Locations {
+		l.WeatherDaily = &WeatherDaily{}
+		l.DailyProperties = &LocationProperties{}
+		l.WeatherHourly = &WeatherHourly{}
+		l.HourlyProperties = &LocationProperties{}
+		l.WeatherCurrent = &WeatherCurrent{}
+		l.CurrentProperties = &LocationProperties{}
+
+		city := strings.ToLower(l.City)
+		rt.Sections = append(rt.Sections, &section.Section{
+			Name:   "weather-" + city,
+			Title:  l.City + " Weather",
+			Icon:   "thunderstorm",
+			Parent: weather_section + "-" + city,
+			Sections: []*section.Section{
+				{
+					Name:   "weather-current-detail" + city,
+					Title:  "Recent History Details",
+					Icon:   "thunderstorm",
+					Parent: weather_section,
+				},
+				{
+					Name:   "weather-hourly-detail" + city,
+					Title:  "Hourly Forecast Details",
+					Icon:   "schedule",
+					Parent: weather_section,
+				},
+				{
+					Name:   "weather-daily-detail" + city,
+					Title:  "Daily Forecast Details",
+					Icon:   "calendar_view_week",
+					Parent: weather_section + "-" + city,
+				},
+			},
+		})
+
+		log.Printf("%v", city)
+	}
+
 	return
 }
 
-func (rt *Runtime) SelectHistory(ID uint64, after string, before string) (history []*Current, err error) {
-	return SelectHistoryInterval(rt.db, ID, after, before, "ASC")
+func (rt *Runtime) SelectHistory(ID uint64, after string, before string) (current []Current, err error) {
+	current = make([]Current, HISTORY_INTERVALS)
+	history, err := SelectHistoryInterval(rt.db, ID, after, before, "ASC")
+	if err != nil {
+		return
+	}
+	tmAfter, err := time.Parse(TIME_LAYOUT, after)
+	if err != nil {
+		return
+	}
+	tmAfter = tmAfter.Truncate(time.Minute)
+	historyLength := len(history)
+
+	rec := 0
+	nextTime := tmAfter
+	var tm time.Time
+
+	for i := range current {
+		nextTime = nextTime.Add(time.Minute * HISTORY_MINUTE_INTERVAL)
+		if rec < historyLength-1 {
+			nextRec := rec + 1
+			tm, err = time.Parse(TIME_LAYOUT, history[nextRec].Time)
+			if err != nil {
+				return
+			}
+			tm = tm.Truncate(time.Minute)
+			if nextTime.Hour() >= tm.Hour() && nextTime.Minute() >= tm.Minute() {
+				rec = nextRec
+			}
+		}
+
+		current[i] = *history[rec]
+		current[i].Time = nextTime.Format(TIME_LAYOUT)
+	}
+	return
 }
 
 func (rt *Runtime) LoadHistory() (err error) {
-	after, before := BeforeTime(time.Now(), 6*time.Hour)
+	after, before := AfterBeforeString(time.Now().Truncate(time.Minute), HISTORY_DURATION, HISTORY_MINUTE_INTERVAL)
 	for _, loc := range rt.Locations {
 		history, err := rt.SelectHistory(loc.ID, after, before)
 		if err != nil {
 			log.Print(err)
+			continue
 		}
 		loc.BuildCurrentProperties(history)
 	}
@@ -158,50 +245,15 @@ func (rt *Runtime) CurrentTemperature() string {
 }
 
 type FormData struct {
-	Action  *action.Action
+	Action  *section.Section
 	Data    any
 	Codes   any
 	Runtime *Runtime
 }
 
 type WeatherFormData struct {
-	Action  *action.Action
+	Action  *section.Section
 	Data    any
 	Codes   map[int32]*WeatherCode
 	Runtime *Runtime
 }
-
-// func (rt *Runtime) HandleAction(path string, templ string, data *WeatherFormData) {
-// 	rt.mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
-// 		if len(path) < 2 {
-// 			return
-// 		}
-// 		w.Header().Add("Cache-Control", "no-cache")
-// 		w.WriteHeader(http.StatusOK)
-// 		data.Action = rt.ActionMap[path[1:]]
-//
-// 		err := rt.Template.Lookup(templ).Execute(w, data)
-// 		if err != nil {
-// 			log.Fatal(path, err)
-// 		}
-// 	})
-//
-// }
-//
-// func (rt *Runtime) HandleWeather() {
-// 	data := &WeatherFormData{
-// 		Codes:   WeatherCodes,
-// 		Data:    rt.Locations,
-// 		Runtime: rt}
-//
-// 	rt.HandleAction("/weather_daily", "weather.daily", data)
-// 	rt.HandleAction("/weather_hourly", "weather.hourly", data)
-// 	rt.HandleAction("/weather_current", "weather.current", data)
-//
-// }
-
-// func wrapStatus(id, msg string) []byte {
-// 	var buf []byte
-// 	buf = fmt.Appendf(buf, `<div id="%s" class="status">%s</div>`, id, msg)
-// 	return buf
-// }

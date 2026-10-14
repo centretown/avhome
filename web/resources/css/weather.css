@@ -1,3 +1,7 @@
+body {
+    --weatherBG: rgba(50, 60, 69, 1);
+}
+
 .windspeed {
     color: rgba(255, 218, 185, 255);
 }
@@ -51,13 +55,13 @@
 }
 
 .weather-label {
-    font-size: 0.75rem;
+    font-size: 0.75em;
     background-color: var(--bgTransparent);
     color: var(--fgBright);
 }
 
 .weather-data {
-    font-size: 0.7rem;
+    font-size: 0.7em;
     background-color: var(--bgTransparent);
     color: var(--fgOut);
 }
@@ -72,9 +76,9 @@
 .grid-sun,
 .grid-hourly,
 .grid-daily {
-    font-size: 0.7rem;
+    font-size: 0.7em;
     display: grid;
-    grid-template-columns: 4rem 4rem 8rem 3rem;
+    grid-template-columns: 4em 4em 8em 3em;
     justify-content: center;
 }
 
@@ -86,37 +90,68 @@
 .grid-icon,
 .grid-icon24,
 .grid-hour {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    padding-top: 2px;
     padding-bottom: 2px;
     justify-content: left;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    color: var(--fgBright);
+    background-color: var(--bgSemiTransparent);
 }
 
 .grid-icon24 {
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    display: grid;
+    grid-template-columns: repeat(24, 1fr);
 }
 
 .grid-hourly {
-    padding-bottom: 0.2rem;
-    grid-template-columns: 1.5rem 4rem 3rem 3rem 3rem 3rem 3rem;
+    display: grid;
+    grid-template-columns: 1.5em 4em 3em 3em 3em 3em 3em;
+    padding-bottom: 0.2em;
 }
 .grid-daily {
-    padding-bottom: 0.2rem;
+    display: grid;
     grid-template-columns: 1fr 3fr 2fr 2fr 2fr;
 }
 .grid-sun {
-    padding-bottom: 0.2rem;
-    grid-template-columns: 1.5rem 4.5rem 4rem 4rem 3.6rem;
+    display: grid;
+    grid-template-columns: 1.5em 4.5em 4em 4em 3.6em;
+    padding-bottom: 0.2em;
 }
 
 .grid-label {
-    font-size: 0.75rem;
+    font-size: 0.75em;
     background-color: var(--bgTransparent);
     color: var(--fgBright);
 }
 
+.grid-minmax {
+    display: grid;
+    grid-template-columns: repeat(8, auto);
+    grid-auto-flow: column dense;
+    font-size: 0.5em;
+    padding-top: 0.2em;
+    padding-bottom: 0.2em;
+    text-align: center;
+}
+
+.grid-data {
+    font-size: 0.6em;
+    color: var(--fgOut);
+}
+
 .weather-summary-date {
-    margin-left: 0.5rem;
-    font-size: 1rem;
+    padding-top: 1em;
+    margin-left: 0.5em;
+    font-size: 0.5em;
+    color: var(--fgBright);
+    /*background-color:  var(--bgTransparent);*/
+}
+
+.weather-title-date {
+    margin-left: 1em;
+    font-weight: bold;
+    font-size: 1em;
     color: var(--fgBright);
 }
 
@@ -128,14 +163,117 @@
 
 .weather-summary-item {
     font-weight: normal;
-    font-size: 0.8rem;
+    font-size: 0.5em;
     color: white;
 }
 
 .weather-summary {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    margin-bottom: 0.5rem;
-    margin-left: 1rem;
-    margin-bottom: 1rem;
+    grid-template-columns: repeat(4, 1fr);
+    margin-bottom: 0.5em;
+    margin-left: 1em;
+    font-size: 0.75em;
+}
+
+.weather-content {
+    /*padding: 1em;*/
+}
+
+.weather-scroll {
+    /*overflow-y: scroll;
+    height: 30em;*/
+}
+.title-city {
+    font-weight: bolder;
+    font-size: .85em;
+    text-align: center;
+    align-content: center;
+}
+.item-city {
+    grid-area: city;
+}
+.item-date {
+    font-weight: normal;
+    font-size: 0.65em;
+    text-align: center;
+    grid-area: date;
+    align-content: center;
+}
+
+.title-weather {
+    display: grid;
+    font-size: 0.9em;
+    font-weight: bold;
+    grid-template-areas:
+        ". icon ."
+        ". icon ."
+        ". date ."
+        ". city ."
+        ". city ."
+        ". city ."
+        ". . .";
+    grid-template-columns: 1fr 1fr 1fr;
+    background-color: var(--weatherBG);
+    border-radius: 0.35em;
+    color: var(--fgBright);
+    padding-bottom: .5em;
+}
+
+.vspace {
+    padding-bottom: .5em;
+    background-color: rgba(0,0,0,1);
+}
+
+.title {
+    display: grid;
+    font-size: 0.9em;
+    font-weight: bold;
+    grid-template-columns: 5fr min-content 5fr;
+    margin-bottom: 0.5em;
+}
+
+.title-center,
+.title-right,
+.title-left {
+    font-weight: normal;
+    font-size: 0.65em;
+    cursor: pointer;
+    color: var(--fgBright);
+    padding-top: 0.15em;
+    padding-bottom: 0.15em;
+}
+.title-right {
+    padding-right: 0.5em;
+}
+.title-left {
+    padding-left: 0.5em;
+}
+
+.title-date {
+    margin-left: 1em;
+    font-weight: bold;
+    font-size: 0.8em;
+}
+
+.title-selected {
+    font-weight: 900;
+    color: var(--fgSelected);
+}
+
+.title-left {
+    text-align: left;
+}
+.title-right {
+    text-align: right;
+}
+.title-center {
+    text-align: center;
+}
+
+.chart-bar,
+.chart {
+    width: 100%;
+    height: 8em;
+    background-color: black;
+    image-rendering: smooth;
 }

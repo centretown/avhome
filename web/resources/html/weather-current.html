@@ -1,0 +1,165 @@
+{{ define "weather.current" }}
+<!---->
+<div>
+    <span>
+        {{$id:=printf "%s-current" .City}}
+        <div id="{{$id}}" class="weather-title-date"></div>
+    </span>
+    <div class="weather-content weather-scroll">
+        {{template "weather.current.properties" .}}
+        <!--  -->
+        {{$wc := .CurrentProperties}}
+        <div class="grid-hour">
+            {{$times:=.WeatherCurrent.FormatTimeCurrent $wc.Time}} {{range
+            $time:=$times}}
+            <span class="grid-data">{{$time}}</span>
+            {{end}}
+        </div>
+        <!--  -->
+        {{template "weather.current.grid" .}}
+        <!--  -->
+        {{template "weather.current.max" .}}
+        <canvas
+            id="canvas-current{{.ID}}"
+            class="chart unfade-it"
+        ></canvas>
+        {{template "weather.current.min" .}}
+        <script>
+            var canvasID = "canvas-current{{.ID}}";
+            var currentItems = new Map();
+            {{range $p:=.CurrentProperties.Items}}
+            {{$id:= printf "current-%s" $p.ID}}
+            currentItems.set({{$id}}, {
+                id:{{$p.ID}},
+                selected: {{$p.Selected}},
+                draw: function (canvasID, codes) {
+                  if ("line"=={{$p.Chart}}) {
+                    showGraph(canvasID, {{$p.Color}}, {{$p.Min}}, {{$p.Max}}, {{$p.Values}});
+                  } else if ("bar"=={{$p.Chart}}) {
+                    showBars(canvasID, {{$p.Values}}, codes);
+                  }
+                },
+            });
+            {{end}}
+
+            cwLoc.set({{.ID}},
+              locationItem("current",
+                canvasID, {{.CurrentProperties.Code}},
+                currentItems));
+
+            drawCurrentItems({{.ID}});
+        </script>
+    </div>
+</div>
+{{end}}
+<!---->
+
+{{ define "weather.current.properties" }}
+<!--  -->
+{{$props:=.CurrentProperties}} {{$w:=.WeatherCurrent}}{{$cur:=$w.Current}}
+<!--  -->
+{{$c:=index $cur.Code}} {{$code:=$w.WeatherCode $c}} {{$loc:=.}}
+<div class="title-weather">
+    <span class="symbols-title weather-item-icon" style="color:{{$code.Color}}">
+        {{$code.Icon}}
+    </span>
+    <div class="title-city item-city">Recent History</div>
+    <div class="item-date">
+        {{$fmt:="3:04PM MST"}} {{$w.UpdateTime.Format $fmt}}
+    </div>
+
+    {{$left:=true}} {{range $pindex,$item:=$props.Items}}{{$last:=len
+    $item.Values}}{{$last:=sub $last 1}}
+    <!--  -->
+    {{if $left}}
+    <div
+        id="current-{{$item.ID}}"
+        class="title-left {{if $item.Selected}}title-selected {{end}}"
+        hx-on:click="toggleCurrentItem({{$loc.ID}}, 'current-{{$item.ID}}')"
+    >
+        <span class="symbols-weather-medium {{$item.Klass}}">
+            {{$item.Icon}}
+        </span>
+        <span>{{index $item.Values $last}}{{$item.Units}}</span>
+    </div>
+    {{else}}
+    <div
+        id="current-{{$item.ID}}"
+        class="title-right {{if $item.Selected}}title-selected {{end}}"
+        hx-on:click="toggleCurrentItem({{$loc.ID}}, 'current-{{$item.ID}}')"
+    >
+        <span>{{index $item.Values $last}}{{$item.Units}}</span>
+        <span class="symbols-weather-medium {{$item.Klass}}">
+            {{$item.Icon}}
+        </span>
+    </div>
+    {{end}}
+    <!--  -->
+    {{$left = not $left}}
+    <!--  -->
+    {{end}}
+</div>
+{{end}}
+<!--  -->
+
+{{ define "weather.current.grid" }}
+<!--  -->
+{{$wc := .WeatherCurrent}}
+<!--  -->
+{{$props := .CurrentProperties}}
+<div class="grid-icon24">
+    {{$len:=len $props.Code}}
+    <!--  -->
+    {{range $idx, $t:=$props.Time}}
+    <!--  -->
+    {{$code := index $props.Code $idx}}
+    <!--  -->
+    {{$wcode := $wc.WeatherCode $code}}
+    <span class="symbols-weather" style="color:{{$wcode.Color}}"
+        >{{$wcode.Icon}}</span
+    >
+    {{end}}
+</div>
+{{ end }}
+<!--  -->
+
+{{ define "weather.current.max" }}
+<!--  -->
+{{$props:=.CurrentProperties}}
+<div id="current-grid-max{{$props.Index}}" class="grid-minmax">
+    <!--  -->
+    {{range $item:=$props.Items}}
+    <span
+        id="current-{{$item.ID}}-max"
+        {{if
+        not
+        $item.Selected}}class="hide"
+        {{end}}
+    >
+        <span class="symbols-weather {{$item.Klass}}">{{$item.Icon}}</span>
+        <span class="{{$item.Klass}}">{{$item.Max}}{{$item.Units}}</span>
+    </span>
+    {{ end }}
+</div>
+{{ end }}
+<!--  -->
+{{ define "weather.current.min" }}
+<!--  -->
+{{$props:=.CurrentProperties}}
+<div id="current-grid-min{{$props.Index}}" class="grid-minmax">
+    <!--  -->
+    {{range $item:=$props.Items}}
+    <span
+        id="current-{{$item.ID}}-min"
+        {{if
+        not
+        $item.Selected}}class="hide"
+        {{end}}
+    >
+        <span class="symbols-weather {{$item.Klass}}">{{$item.Icon}}</span>
+        <span class="{{$item.Klass}}">{{$item.Min}}{{$item.Units}}</span>
+    </span>
+    {{ end }}
+</div>
+{{ end }}
+<!--  -->

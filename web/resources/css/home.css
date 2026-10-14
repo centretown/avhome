@@ -12,7 +12,9 @@ body {
     --bgItem: rgba(37, 50, 60, 1);
     --bgFolder: rgba(100, 156, 175, 1);
     --fgFolder: rgba(0, 0, 0, 1);
-    --bgSubFolder: rgba(75, 105, 115, 1);
+    --bgMidFolder: rgba(85, 120, 130, 1);
+    --fgMidFolder: rgba(100, 211, 211, 1);
+    --bgSubFolder: rgba(55, 80, 82, 1);
     --fgSubFolder: rgba(100, 211, 211, 1);
     --fgIcon: rgba(0, 0, 0, 1);
 
@@ -84,17 +86,17 @@ body {
 .symbols-title,
 .symbols-small {
     color: var(--fgIcon);
-    margin-right: 0.5rem;
+    margin-right: 0.5em;
     font-size: 1rem;
 }
 .symbols-weather-medium,
 .symbols-weather {
-    font-size: 0.75rem;
-    margin-right: 0rem;
+    font-size: 0.8em;
+    margin-right: 0;
     color: var(--fgIcon);
 }
 .symbols-weather-medium {
-    font-size: 0.9rem;
+    font-size: .9em;
     cursor: pointer;
 }
 .symbols-title {
@@ -118,21 +120,34 @@ body {
 .video {
     width: 100%;
 }
+.mid-header,
 .sub-header {
     display: grid;
     grid-template-columns: auto auto auto;
     justify-content: space-between;
     cursor: default;
-    background-color: var(--bgSubFolder);
+    background-color: var(--bgMidFolder);
     border-radius: 0.25rem;
     margin-bottom: 0.2rem;
 }
+.sub-header {
+    background-color: var(--bgSubFolder);
+}
+
+.mid-text,
 .sub-text {
-    font-size: 1rem;
+    font-size: 1.2rem;
     font-weight: bold;
     color: var(--skyblue);
     align-self: center;
 }
+
+.sub-text {
+    font-weight: normal;
+    padding-left: .8rem;
+    font-size: .8rem;
+}
+
 .folder-header {
     display: grid;
     grid-template-columns: auto auto auto;
@@ -233,10 +248,12 @@ body {
 }
 
 .main-content {
+    font-size: 1.4rem;
     grid-area: content;
     width: 100%;
 }
 .side-list {
+    font-size: 1.4rem;
     grid-area: list;
     width: 100%;
 }
@@ -262,6 +279,7 @@ body {
         width: 100%;
         height: 100vh;
         overflow-y: auto;
+        font-size: 2rem;
     }
     .side-list {
         grid-area: list;

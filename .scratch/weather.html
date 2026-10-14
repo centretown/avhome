@@ -1,0 +1,69 @@
+{{ define "weather.common" }}
+<div class="">
+    <div class="weather-label">Latitude</div>
+    <div class="weather-label">Longitude</div>
+    <div class="weather-label">Timezone</div>
+    <div class="weather-label">Elevation</div>
+    <div class="weather-data">{{printf "%5.2f" .Latitude}}</div>
+    <div class="weather-data">{{printf "%5.2f" .Longitude}}</div>
+    <div class="weather-data">{{.Timezone}}</div>
+    <div class="weather-data">{{.Elevation}}</div>
+</div>
+{{ end }}
+<!--  -->
+
+{{ define "weather" }}
+{{template "weather.current.script" .}}
+<!---->
+{{template "folder.header" "Weather"}}
+<div id="Weather-fold" class="folder-item hide">
+    {{$sections:=.Weather.Sections}}
+    {{range $loc:= .Weather.Locations}}
+    <!---->
+    {{template "mid.header" $loc.City}}
+    <div id="{{printf "%s%s" $loc.City "-fold"}}">
+        {{range $sec:= $sections}}
+        <!---->
+        {{$titleh:=printf "%s %s" $loc.City $sec.Title}}
+        <!---->
+        <div id="{{$titleh}}-fold" class="folder-item">
+            {{if eq $sec.Name "weather_hourly"}}
+            {{template "weather.hourly" $loc}}
+            <!---->
+            {{else if eq $sec.Name "weather_current"}}
+            {{template "weather.current" $loc}}
+            {{else}}
+            {{template "weather.daily.detail" $loc}}
+            {{end}}
+        </div>
+    {{ end }}
+    </div>
+    {{ end }}
+</div>
+<!--  -->
+{{ end }}
+<!---->
+{{ define "current.summary" }}
+<!---->
+<div id="summary" class="summary" hx-swap-oob="outerHTML">
+    {{$w:=.Weather.Location.WeatherCurrent}}{{$cur:=$w.Current}}{{$units:=$w.CurrentUnits}}
+    <!--  -->
+    {{$code:=$w.WeatherCode $cur.Code}}
+    <!--  -->
+    <div id="clock" class="summary-clock"></div>
+    <div class="symbols-summary summary-icon" style="color:{{$code.Color}}">
+        {{$code.Icon}}
+    </div>
+    <div class="summary-temperature">
+        {{$cur.Temperature}}{{$units.Temperature}}
+        <!--<span> {{$cur.Precipitation}} {{$units.Precipitation}} </span>-->
+    </div>
+    <script>
+        startClock();
+    </script>
+</div>
+{{ end }}
+<!--  -->
+{{ define "location.weather" }}
+<!--  -->
+{{ end }}
