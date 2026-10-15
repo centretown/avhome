@@ -15,14 +15,14 @@
 {{ define "weather" }}
 <!---->
 {{template "folder.header" .Section}}
-<div id="{{.Section.Name}}-fold" class="folder-item hide">
+<div id="{{.Section.Name}}-fold" class="folder-item">
     {{$sections:=.Sections}}
     <!---->
     {{range $i, $loc:=.Locations}} {{$section:=index $sections $i}}
     <!---->
     {{template "mid.header" $section}}
     <!---->
-    <div id="{{$section.Name}}-fold" class="folder-item">
+    <div id="{{$section.Name}}-fold" class="folder-item hide">
         {{template "weather.current" $loc}}
         {{$sub0:=index $section.Sections 0}}
         {{template "sub.header" $sub0}}
