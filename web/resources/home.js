@@ -1,4 +1,5 @@
 function swapClass(id, klass1) {
+  console.log(id, klass1);
   const element = document.getElementById(id);
   if (element.className.includes(klass1)) {
     element.classList.remove(klass1);

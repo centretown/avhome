@@ -39,6 +39,7 @@
         </div>
         <div class="vspace"></div>
         <!---->
+        {{template "weather.daily" $loc}}
         {{$sub2:=index $section.Sections 2}}
         {{template "sub.header" $sub2}}
         <div id="{{$sub2.Name}}-fold" class="hide">

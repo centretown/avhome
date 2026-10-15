@@ -27,6 +27,17 @@ function toggleHourlyDetail(locID, id) {
   hrLoc.get(locID).toggleDetail(id);
 }
 
+const dayLoc = new Map();
+function drawDailyItems(locID) {
+    dayLoc.get(locID).drawItems();
+}
+function toggleDailyItem(locID, itemID) {
+    dayLoc.get(locID).toggleItem(itemID);
+}
+function toggleDailyDetail(locID, id) {
+    dayLoc.get(locID).toggleDetail(id);
+}
+
 function locationItem(prefix, canvasID, codes, items) {
   let obj = {
     hide: true,

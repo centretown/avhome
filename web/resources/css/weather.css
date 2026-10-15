@@ -82,11 +82,7 @@ body {
     justify-content: center;
 }
 
-.grid-day {
-    justify-content: left;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-}
-
+.grid-day,
 .grid-icon,
 .grid-icon24,
 .grid-hour {
@@ -98,6 +94,17 @@ body {
     color: var(--fgBright);
     background-color: var(--bgSemiTransparent);
 }
+
+.grid-day {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.grid-icon {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
 
 .grid-icon24 {
     display: grid;

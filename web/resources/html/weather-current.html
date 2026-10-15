@@ -1,10 +1,6 @@
 {{ define "weather.current" }}
 <!---->
 <div>
-    <span>
-        {{$id:=printf "%s-current" .City}}
-        <div id="{{$id}}" class="weather-title-date"></div>
-    </span>
     <div class="weather-content weather-scroll">
         {{template "weather.current.properties" .}}
         <!--  -->

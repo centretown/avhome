@@ -1,0 +1,153 @@
+{{ define "weather.daily" }}
+<!---->
+<div>
+    <div class="weather-content weather-scroll">
+        {{template "weather.daily.properties" .}}
+        <!--  -->
+        {{$daily := .WeatherDaily}}
+        <div class="grid-day">
+            {{range $i,$t := $daily.Daily.Time}}
+            <span class="grid-data">{{$daily.FormatDayShort $i}}</span>
+            {{end}}
+        </div>
+        {{template "weather.daily.grid" .}}
+        <!--  -->
+        {{template "weather.daily.max" .}}
+        <canvas id="daily-canvas{{.ID}}" class="chart unfade-it"></canvas>
+        {{template "weather.daily.min" .}}
+        <script>
+            {
+                const dCanvasID = "daily-canvas{{.ID}}";
+                const dailyItems = new Map();
+                {{range $p:=.DailyProperties.Items}}
+                {{$id:= printf "daily-%s" $p.ID}}
+                dailyItems.set({{$id}}, {
+                    id:{{$p.ID}},
+                    selected: {{$p.Selected}},
+                    chartType: {{$p.Chart}},
+                    draw: function (dCanvasID, codes) {
+                      if ("line"=={{$p.Chart}}) {
+                        showGraph(dCanvasID, {{$p.Color}}, {{$p.Min}}, {{$p.Max}}, {{$p.Values}});
+                      } else if ("bar"=={{$p.Chart}}) {
+                        showBars(dCanvasID, {{$p.Values}}, codes);
+                      }
+                }});
+                {{end}}
+                dayLoc.set({{.ID}},
+                  locationItem("daily",
+                    dCanvasID, {{.WeatherDaily.Daily.Code}},
+                    dailyItems));
+
+                drawDailyItems({{.ID}});
+            }
+        </script>
+    </div>
+</div>
+{{ end }}
+<!--  -->
+{{ define "weather.daily.properties"}} {{$loc:=.}}
+<!--  -->
+{{$props:=.DailyProperties}} {{$w:=.WeatherDaily}}{{$cur:=$w.Daily}}
+<!--  -->
+{{$c:=index $cur.Code 0}} {{$code:=$w.WeatherCode $c}}
+<!--  -->
+<div class="title-weather">
+    <span class="symbols-title weather-item-icon" style="color:{{$code.Color}}">
+        {{$code.Icon}}
+    </span>
+    <div class="title-city item-city">Daily Forecast</div>
+    <div class="item-date">
+        {{$fmt:="3:04PM MST"}} {{$w.UpdateTime.Format $fmt}}
+    </div>
+
+    {{$left:=true}} {{range $item:=$props.Items}} {{if $left}}
+    <div
+        id="daily-{{$item.ID}}"
+        class="title-left {{if
+        $item.Selected}}title-selected
+        {{end}}"
+        hx-on:click="toggleDailyItem({{$loc.ID}}, 'daily-{{$item.ID}}')"
+    >
+        <span class="symbols-weather-medium {{$item.Klass}}"
+            >{{$item.Icon}}</span
+        >
+        <span>{{index $item.Values 0}}{{$item.Units}}</span>
+    </div>
+    {{else}}
+    <div
+        id="daily-{{$item.ID}}"
+        class="title-right {{if
+        $item.Selected}}title-selected
+        {{end}}"
+        hx-on:click="toggleDailyItem({{$loc.ID}}, 'daily-{{$item.ID}}')"
+    >
+        <span>{{index $item.Values 0}}{{$item.Units}}</span>
+        <span class="symbols-weather-medium {{$item.Klass}}"
+            >{{$item.Icon}}</span
+        >
+    </div>
+    {{end}}
+    <!--  -->
+    {{$left = not $left}}
+    <!--  -->
+    {{ end }}
+</div>
+{{ end }}
+<!--  -->
+{{ define "weather.daily.max" }}
+<!--  -->
+{{$props:=.DailyProperties}}
+<div id="daily-grid-max{{.ID}}" class="grid-minmax">
+    <!--  -->
+    {{range $item:=$props.Items}}
+    <span
+        id="daily-{{$item.ID}}-max"
+        {{if
+        not
+        $item.Selected}}class="hide"
+        {{end}}
+    >
+        <span class="symbols-weather {{$item.Klass}}">{{$item.Icon}}</span>
+        <span class="{{$item.Klass}}">{{$item.Max}}{{$item.Units}}</span>
+    </span>
+    {{ end }}
+</div>
+{{ end }}
+
+<!--  -->
+{{ define "weather.daily.min" }}
+<!--  -->
+{{$props:=.DailyProperties}}
+<div id="daily-grid-min{{.ID}}" class="grid-minmax">
+    <!--  -->
+    {{range $item:=$props.Items}}
+    <span
+        id="daily-{{$item.ID}}-min"
+        {{if
+        not
+        $item.Selected}}class="hide"
+        {{end}}
+    >
+        <span class="symbols-weather {{$item.Klass}}">{{$item.Icon}}</span>
+        <span class="{{$item.Klass}}">{{$item.Min}}{{$item.Units}}</span>
+    </span>
+    {{ end }}
+</div>
+{{ end }}
+<!---->
+<!---->
+{{ define "weather.daily.grid" }}
+<div class="grid-day grid">
+    {{$daily:=.WeatherDaily}}
+    <!---->
+    {{range $code := $daily.Daily.Code}}
+    <!---->
+    {{$wcode := $daily.WeatherCode $code}}
+    <!---->
+    <span class="symbols-weather" style="color:{{$wcode.Color}}"
+        >{{$wcode.Icon}}</span
+    >
+    {{end}}
+</div>
+{{ end }}
+<!---->
