@@ -15,7 +15,6 @@ type Runtime struct {
 	Location      *Location
 	Locations     []*Location
 	LocationIndex int
-	SubSections   []*section.Section
 	Sections      []*section.Section
 	Section       *section.Section
 	retry         *time.Ticker
@@ -33,26 +32,6 @@ func NewRuntime() (rt *Runtime) {
 			Parent: weather_section,
 		},
 		Sections: make([]*section.Section, 0),
-		SubSections: []*section.Section{
-			{
-				Name:   "weather_current",
-				Title:  "Recent Conditions",
-				Icon:   "thunderstorm",
-				Parent: weather_section,
-			},
-			{
-				Name:   "weather_hourly",
-				Title:  "Hourly Forecast",
-				Icon:   "schedule",
-				Parent: weather_section,
-			},
-			{
-				Name:   "weather_daily",
-				Title:  "Daily Forecast",
-				Icon:   "calendar_view_week",
-				Parent: weather_section,
-			},
-		},
 	}
 	return
 }
@@ -96,19 +75,19 @@ func (rt *Runtime) LoadLocations() (err error) {
 			Sections: []*section.Section{
 				{
 					Name:   "weather-current-detail" + city,
-					Title:  "Recent History Details",
+					Title:  "Recent History",
 					Icon:   "thunderstorm",
 					Parent: weather_section,
 				},
 				{
 					Name:   "weather-hourly-detail" + city,
-					Title:  "Hourly Forecast Details",
+					Title:  "Hourly Details",
 					Icon:   "schedule",
 					Parent: weather_section,
 				},
 				{
 					Name:   "weather-daily-detail" + city,
-					Title:  "Daily Forecast Details",
+					Title:  "Daily Details",
 					Icon:   "calendar_view_week",
 					Parent: weather_section + "-" + city,
 				},

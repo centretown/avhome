@@ -19,35 +19,35 @@
         {{template "weather.current.grid" .}}
         <!--  -->
         {{template "weather.current.max" .}}
-        <canvas
-            id="canvas-current{{.ID}}"
-            class="chart unfade-it"
-        ></canvas>
+        <canvas id="canvas-current{{.ID}}" class="chart unfade-it"></canvas>
         {{template "weather.current.min" .}}
         <script>
-            var canvasID = "canvas-current{{.ID}}";
-            var currentItems = new Map();
-            {{range $p:=.CurrentProperties.Items}}
-            {{$id:= printf "current-%s" $p.ID}}
-            currentItems.set({{$id}}, {
-                id:{{$p.ID}},
-                selected: {{$p.Selected}},
-                draw: function (canvasID, codes) {
-                  if ("line"=={{$p.Chart}}) {
-                    showGraph(canvasID, {{$p.Color}}, {{$p.Min}}, {{$p.Max}}, {{$p.Values}});
-                  } else if ("bar"=={{$p.Chart}}) {
-                    showBars(canvasID, {{$p.Values}}, codes);
-                  }
-                },
-            });
-            {{end}}
+            {
+              const cCanvasID = "canvas-current{{.ID}}";
+              const currentItems = new Map();
+              {{range $p:=.CurrentProperties.Items}}
+                {{$id:= printf "current-%s" $p.ID}}
+                currentItems.set({{$id}}, {
+                    id:{{$p.ID}},
+                    selected: {{$p.Selected}},
+                    chartType: {{$p.Chart}},
+                    draw: function (cCanvasID, codes) {
+                      if ("line"=={{$p.Chart}}) {
+                        showGraph(cCanvasID, {{$p.Color}}, {{$p.Min}}, {{$p.Max}}, {{$p.Values}});
+                      } else if ("bar"=={{$p.Chart}}) {
+                        showBars(cCanvasID, {{$p.Values}}, codes);
+                      }
+                    },
+                });
+              {{end}}
 
-            cwLoc.set({{.ID}},
-              locationItem("current",
-                canvasID, {{.CurrentProperties.Code}},
-                currentItems));
+              cwLoc.set({{.ID}},
+                locationItem("current",
+                  cCanvasID, {{.CurrentProperties.Code}},
+                  currentItems));
 
-            drawCurrentItems({{.ID}});
+              drawCurrentItems({{.ID}});
+            }
         </script>
     </div>
 </div>
@@ -63,7 +63,7 @@
     <span class="symbols-title weather-item-icon" style="color:{{$code.Color}}">
         {{$code.Icon}}
     </span>
-    <div class="title-city item-city">Recent History</div>
+    <div class="title-city item-city">Recent Conditions</div>
     <div class="item-date">
         {{$fmt:="3:04PM MST"}} {{$w.UpdateTime.Format $fmt}}
     </div>

@@ -26,9 +26,6 @@ function toggleHourlyDetail(locID, id) {
   console.log(locId, id);
   hrLoc.get(locID).toggleDetail(id);
 }
-// document.getElementById("hourly-date").innerHTML = showFullDate(
-//     new Date(),
-// );
 
 function locationItem(prefix, canvasID, codes, items) {
   let obj = {
@@ -41,7 +38,12 @@ function locationItem(prefix, canvasID, codes, items) {
       clearCanvas(this.canvasID);
       showMinMax(this.canvasID);
       for (let [_, item] of this.items) {
-        if (item.selected) {
+        if (item.selected && item.chartType=="bar") {
+          item.draw(this.canvasID, this.codes);
+        }
+      }
+      for (let [_, item] of this.items) {
+        if (item.selected && item.chartType=="line") {
           item.draw(this.canvasID, this.codes);
         }
       }

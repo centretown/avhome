@@ -19,34 +19,35 @@
         {{template "weather.hourly.grid" .}}
         <!--  -->
         {{template "weather.hourly.max" .}}
-        <canvas
-            id="canvas-hourly{{.ID}}"
-            class="chart unfade-it"
-        ></canvas>
+        <canvas id="canvas-hourly{{.ID}}" class="chart unfade-it"></canvas>
         {{template "weather.hourly.min" .}}
         <script>
-            var canvasID = "canvas-hourly{{.ID}}";
-            var hourlyItems = new Map();
-            {{range $p:=.HourlyProperties.Items}}
-            {{$id:= printf "hourly-%s" $p.ID}}
-            hourlyItems.set({{$id}}, {
-                id:{{$p.ID}},
-                selected: {{$p.Selected}},
-                draw: function (canvasId, codes) {
-                  if ("line"=={{$p.Chart}}) {
-                    showGraph(canvasId, {{$p.Color}}, {{$p.Min}}, {{$p.Max}}, {{$p.Values}});
-                  } else if ("bar"=={{$p.Chart}}) {
-                    showBars(canvasId, {{$p.Values}}, codes);
-                  }
-            }});
-            {{end}}
+            {
+                const hCanvasID = "canvas-hourly{{.ID}}";
+                const hourlyItems = new Map();
+                {{range $p:=.HourlyProperties.Items}}
+                  {{$id:= printf "hourly-%s" $p.ID}}
+                  hourlyItems.set({{$id}}, {
+                      id:{{$p.ID}},
+                      selected: {{$p.Selected}},
+                      chartType: {{$p.Chart}},
+                      draw: function (hCanvasID, codes) {
+                        if ("line"=={{$p.Chart}}) {
+                          showGraph(hCanvasID, {{$p.Color}}, {{$p.Min}}, {{$p.Max}}, {{$p.Values}});
+                        } else if ("bar"=={{$p.Chart}}) {
+                          showBars(hCanvasID, {{$p.Values}}, codes);
+                        }
+                      }
+                  });
+                {{end}}
 
-            hrLoc.set({{.ID}},
-              locationItem("hourly",
-                canvasID, {{.WeatherHourly.Hourly.Code}},
-                hourlyItems));
+                hrLoc.set({{.ID}},
+                  locationItem("hourly",
+                    hCanvasID, {{.WeatherHourly.Hourly.Code}},
+                    hourlyItems));
 
-            drawHourlyItems({{.ID}});
+                drawHourlyItems({{.ID}});
+            }
         </script>
     </div>
 </div>
@@ -57,8 +58,7 @@
 <!--  -->
 {{$props:=.HourlyProperties}} {{$w:=.WeatherHourly}}{{$cur:=$w.Hourly}}
 <!--  -->
-{{$c:=index $w.Hourly.Code 0}}
-{{$code:=$w.WeatherCode 0}}
+{{$c:=index $w.Hourly.Code 0}} {{$code:=$w.WeatherCode 0}}
 <!--  -->
 <div class="title-weather">
     <span class="symbols-title weather-item-icon" style="color:{{$code.Color}}">
@@ -122,7 +122,7 @@
 <div id="hourly-grid-max{{.ID}}" class="grid-minmax">
     <!--  -->
     {{$loc:=.}}
-   <!---->
+    <!---->
     {{range $item:=$props.Items}}
     <span
         id="hourly-{{$item.ID}}-max"
@@ -144,7 +144,7 @@
 <div id="grid-min{{.ID}}" class="grid-minmax">
     <!--  -->
     {{$loc:=.}}
-   <!---->
+    <!---->
     {{range $item:=$props.Items}}
     <!--  -->
     <span
@@ -159,9 +159,7 @@
     </span>
     {{ end }}
 </div>
-{{ end }}
-
-{{ define "weather.hourly.detail" }}
+{{ end }} {{ define "weather.hourly.detail" }}
 <!--  -->
 {{$location:=.}}{{$w:=.WeatherHourly}}
 <!--  -->
