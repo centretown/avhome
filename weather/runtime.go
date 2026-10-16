@@ -75,7 +75,7 @@ func (rt *Runtime) LoadLocations() (err error) {
 			Sections: []*section.Section{
 				{
 					Name:   "weather-current-detail" + city,
-					Title:  "Recent History",
+					Title:  "Recent Details",
 					Icon:   "thunderstorm",
 					Parent: weather_section,
 				},
@@ -134,11 +134,13 @@ func (rt *Runtime) SelectHistory(ID uint64, after string, before string) (curren
 		current[i] = *history[rec]
 		current[i].Time = nextTime.Format(TIME_LAYOUT)
 	}
+	// slices.Reverse(current)
 	return
 }
 
 func (rt *Runtime) LoadHistory() (err error) {
-	after, before := AfterBeforeString(time.Now().Truncate(time.Minute), HISTORY_DURATION, HISTORY_MINUTE_INTERVAL)
+	after, before := AfterBeforeString(time.Now().
+		Truncate(time.Minute), HISTORY_DURATION, HISTORY_MINUTE_INTERVAL)
 	for _, loc := range rt.Locations {
 		history, err := rt.SelectHistory(loc.ID, after, before)
 		if err != nil {

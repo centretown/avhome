@@ -1,6 +1,6 @@
 {{ define "weather.current" }}
 <!---->
-<div>
+<div id="weather-current{{.ID}}" class="unfade-it" hx-swap-oob="outerHTML">
     <div class="weather-content weather-scroll">
         {{template "weather.current.properties" .}}
         <!--  -->
@@ -15,7 +15,7 @@
         {{template "weather.current.grid" .}}
         <!--  -->
         {{template "weather.current.max" .}}
-        <canvas id="canvas-current{{.ID}}" class="chart unfade-it"></canvas>
+        <canvas id="canvas-current{{.ID}}" class="chart"></canvas>
         {{template "weather.current.min" .}}
         <script>
             {
@@ -158,4 +158,49 @@
     {{ end }}
 </div>
 {{ end }}
+<!--  -->
+
+<!--  -->
+{{ define "weather.current.history" }}
+<!--  -->
+{{$location:=.}}{{$w:=$location.WeatherCurrent}}
+<div id="weather-current-history{{$location.ID}}" class="unfade-it" hx-swap-oob="outerHTML">
+    <!--  -->
+    {{$props:=.CurrentProperties}}
+    <!--  -->
+    {{$count:=len $props.Time}} {{$count:=sub $count 1}} {{range
+    $no,$rec:=$props.Time}}
+    <!--  -->
+    {{$recno:=sub $count $no}}
+    <!--  -->
+    {{$pcode:=index $props.Code $recno}} {{$code:=$w.WeatherCode $pcode}}
+    <div class="weather-summary-date">
+        <span
+            class="symbols-weather-medium item-icon"
+            style="color:{{$code.Color}}; font-size:1rem"
+        >
+            {{$code.Icon}}
+        </span>
+        {{$time:=index $props.Time $recno}}
+        {{$location.WeatherCurrent.FormatTime $time}}
+    </div>
+
+    <div class="weather-summary">
+        {{range $item:=$props.Items}}
+        <!--  -->
+        <span id="current-item-{{$item.ID}}">
+            <span class="symbols-weather-medium {{$item.Klass}}">
+                {{$item.Icon}}
+            </span>
+            <span class="weather-summary-item"
+                >{{index $item.Values $recno}}{{$item.Units}}</span
+            >
+        </span>
+        <!--  -->
+        {{end}}
+    </div>
+    {{end}}
+    <!--  -->
+</div>
+{{end}}
 <!--  -->

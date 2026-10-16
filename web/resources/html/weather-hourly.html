@@ -1,6 +1,6 @@
 {{ define "weather.hourly" }}
 <!---->
-<div>
+<div id="weather-hourly{{.ID}}" class="unfade-it" hx-swap-oob="outerHTML">
     <div class="weather-content weather-scroll">
         <!--  -->
         {{template "weather.hourly.properties" .}}
@@ -15,7 +15,7 @@
         {{template "weather.hourly.grid" .}}
         <!--  -->
         {{template "weather.hourly.max" .}}
-        <canvas id="canvas-hourly{{.ID}}" class="chart unfade-it"></canvas>
+        <canvas id="canvas-hourly{{.ID}}" class="chart"></canvas>
         {{template "weather.hourly.min" .}}
         <script>
             {
@@ -167,34 +167,36 @@
 <!--  -->
 {{$location:=.}}{{$w:=.WeatherHourly}}
 <!--  -->
-{{range $hourlyIndex,$time:=$w.Hourly.Time}}
-<!--  -->
-{{$c:=index $w.Hourly.Code $hourlyIndex}} {{$code:=$w.WeatherCode $c}}
-<div class="weather-summary-date">
-    <span
-        class="symbols-weather-medium weather-item-icon"
-        style="color:{{$code.Color}}; font-size:1rem"
-    >
-        {{$code.Icon}}
-    </span>
-    {{$w.WeatherCommon.FormatTime $time }}
-</div>
-{{$props:=$location.HourlyProperties}}
-<div id="hourly-detail-{{$location.ID}}" class="weather-summary">
-    {{range $index, $item:=$props.Items}}
-    <span id="hourly-detail-item-{{$item.ID}}">
-        <span class="symbols-weather-medium {{$item.Klass}}">
-            {{$item.Icon}}
-        </span>
-        <span class="weather-summary-item"
-            >{{index $item.Values $hourlyIndex}}{{$item.Units}}</span
-        >
-    </span>
+<div id="weather-hourly-detail{{$location.ID}}" class="unfade-it" hx-swap-oob="outerHTML">
+    {{range $hourlyIndex,$time:=$w.Hourly.Time}}
     <!--  -->
-    {{end}}
+    {{$c:=index $w.Hourly.Code $hourlyIndex}} {{$code:=$w.WeatherCode $c}}
+    <div class="weather-summary-date">
+        <span
+            class="symbols-weather-medium weather-item-icon"
+            style="color:{{$code.Color}}; font-size:1rem"
+        >
+            {{$code.Icon}}
+        </span>
+        {{$w.WeatherCommon.FormatTime $time }}
+    </div>
+    {{$props:=$location.HourlyProperties}}
+    <div class="weather-summary">
+        {{range $index, $item:=$props.Items}}
+        <span>
+            <span class="symbols-weather-medium {{$item.Klass}}">
+                {{$item.Icon}}
+            </span>
+            <span class="weather-summary-item"
+                >{{index $item.Values $hourlyIndex}}{{$item.Units}}</span
+            >
+        </span>
+        <!--  -->
+        {{end}}
+    </div>
+    <!--  -->
+    {{ end }}
+    <!--  -->
 </div>
-<!--  -->
-<!--  -->
-{{ end }}
 <!--  -->
 {{ end }}

@@ -60,7 +60,12 @@ func Run() {
 	webRun.addHandlers(mux, sockServer)
 	go serve(server)
 
-	webRun.poll()
+	const (
+		startMinute = 4  // 4 minutes after the hour
+		spanMinute  = 15 // every 15 minutes
+	)
+	// webRun.r
+	webRun.poll(startMinute, spanMinute)
 
 }
 
@@ -129,11 +134,7 @@ func (webRun *Runtime) addHandlers(mux *http.ServeMux, sockServer *socket.Server
 
 }
 
-func (webRun *Runtime) poll() {
-	const (
-		startMinute = 4  // 4 minutes after the hour
-		spanMinute  = 15 // every 15 minutes
-	)
+func (webRun *Runtime) poll(startMinute int, spanMinute int) {
 
 	webRun.Weather.QueryCurrent()
 	webRun.Weather.QueryDaily()
@@ -144,9 +145,33 @@ func (webRun *Runtime) poll() {
 
 	resetTicker := true
 	ticker := time.NewTicker(firstTicker(startMinute, spanMinute))
-	rt := webRun.Weather
 	buf := bytes.Buffer{}
 	now := time.Now()
+
+	var (
+		currentSummaryT *template.Template
+		currentT        *template.Template
+		currentHistoryT *template.Template
+		hourlyT         *template.Template
+		hourlyDetailT   *template.Template
+		dailyT          *template.Template
+		dailyDetailT    *template.Template
+	)
+
+	refreshTemplates := func() {
+		t := webRun.template
+		currentSummaryT = t.Lookup("current.summary")
+		currentT = t.Lookup("weather.current")
+		currentHistoryT = t.Lookup("weather.current.history")
+		hourlyT = t.Lookup("weather.hourly")
+		hourlyDetailT = t.Lookup("weather.hourly.detail")
+		dailyT = t.Lookup("weather.daily")
+		dailyDetailT = t.Lookup("weather.daily.detail")
+	}
+
+	webRun.refreshTemplate()
+	refreshTemplates()
+
 	for {
 		select {
 		case sig := <-sigs:
@@ -157,30 +182,59 @@ func (webRun *Runtime) poll() {
 				ticker.Reset(time.Duration(spanMinute) * time.Minute)
 				resetTicker = false
 			}
-			go func() {
-				rt.QueryCurrent()
-				t := webRun.template.Lookup("current.summary")
-				t.Execute(&buf, webRun)
-				sockServer.Broadcast(buf.String())
 
-				if now.Minute() == startMinute {
+			// go func() {
+			rt := webRun.Weather
+			rt.QueryCurrent()
 
-					rt.QueryHourly()
-					// t := httpTemplate.Lookup("weather.hourly.detail")
-					// t.Execute(&buf, rt.Location)
-					// sockServer.Broadcast(buf.String())
-					if now.Hour()%4 == 0 {
-						rt.QueryDaily()
-						// t := httpTemplate.Lookup("weather.daily.detail")
-						// t.Execute(&buf, rt.Location)
-						// sockServer.Broadcast(buf.String())
-					}
+			webRun.refreshTemplate()
+			refreshTemplates()
+			currentSummaryT.Execute(&buf, webRun)
+			sockServer.Broadcast(buf.String())
+
+			locations := rt.Locations
+			broadcastLocations(locations, currentT, sockServer)
+			broadcastLocations(locations, currentHistoryT, sockServer)
+
+			if now.Minute() == startMinute {
+				rt.QueryHourly()
+				locations = rt.Locations
+				broadcastLocations(locations, hourlyT, sockServer)
+				broadcastLocations(locations, hourlyDetailT, sockServer)
+
+				if now.Hour()%4 == 0 {
+					rt.QueryDaily()
+					locations = rt.Locations
+					broadcastLocations(locations, dailyT, sockServer)
+					broadcastLocations(locations, dailyDetailT, sockServer)
 				}
-			}()
+			}
+			// }()
 
 		default:
 			time.Sleep(time.Millisecond * 10)
 		}
+	}
+}
+
+type Broadcaster interface {
+	Broadcast(string)
+}
+
+func broadcastLocation(location *weather.Location, t *template.Template, broadcaster Broadcaster) {
+	buf := bytes.Buffer{}
+	err := t.Execute(&buf, location)
+	if err != nil {
+		log.Printf("broadcastLocation: %v", err)
+		return
+	}
+	broadcaster.Broadcast(buf.String())
+}
+
+func broadcastLocations(locations []*weather.Location, t *template.Template, broadcaster Broadcaster) {
+	for _, location := range locations {
+		time.Sleep(time.Second)
+		broadcastLocation(location, t, broadcaster)
 	}
 }
 

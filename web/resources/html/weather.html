@@ -27,7 +27,7 @@
         {{$sub0:=index $section.Sections 0}}
         {{template "sub.header" $sub0}}
         <div id="{{$sub0.Name}}-fold" class="hide">
-            {{template "weather.current.history" .}}
+            {{template "weather.current.history" $loc}}
         </div>
         <div class="vspace"></div>
         <!---->
@@ -35,7 +35,7 @@
         {{$sub1:=index $section.Sections 1}}
         {{template "sub.header" $sub1}}
         <div id="{{$sub1.Name}}-fold" class="hide">
-            {{template "weather.hourly.detail" .}}
+            {{template "weather.hourly.detail" $loc}}
         </div>
         <div class="vspace"></div>
         <!---->

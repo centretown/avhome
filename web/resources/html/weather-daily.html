@@ -1,6 +1,6 @@
 {{ define "weather.daily" }}
 <!---->
-<div>
+<div id="weather-daily{{.ID}}" class="unfade-it" hx-swap-oob="outerHTML">
     <div class="weather-content weather-scroll">
         {{template "weather.daily.properties" .}}
         <!--  -->
@@ -13,7 +13,7 @@
         {{template "weather.daily.grid" .}}
         <!--  -->
         {{template "weather.daily.max" .}}
-        <canvas id="daily-canvas{{.ID}}" class="chart unfade-it"></canvas>
+        <canvas id="daily-canvas{{.ID}}" class="chart"></canvas>
         {{template "weather.daily.min" .}}
         <script>
             {
@@ -151,3 +151,41 @@
 </div>
 {{ end }}
 <!---->
+
+{{ define "weather.daily.detail" }}
+<!--  -->
+{{$location:=.}}{{$w:=.WeatherDaily}}
+<!--  -->
+<div id="weather-daily-detail{{$location.ID}}" class="unfade-it" hx-swap-oob="outerHTML">
+    {{range $dailyIndex,$time:=$w.Daily.Time}}
+    <!--  -->
+    {{$c:=index $w.Daily.Code $dailyIndex}} {{$code:=$w.WeatherCode $c}}
+    <div class="weather-summary-date">
+        <span
+            class="symbols-weather-medium weather-item-icon"
+            style="color:{{$code.Color}}; font-size:1rem"
+        >
+            {{$code.Icon}}
+        </span>
+        {{$w.FormatDay $dailyIndex }}
+    </div>
+    {{$props:=$location.DailyProperties}}
+    <div class="weather-summary">
+        {{range $index, $item:=$props.Items}}
+        <span>
+            <span class="symbols-weather-medium {{$item.Klass}}">
+                {{$item.Icon}}
+            </span>
+            <span class="weather-summary-item"
+                >{{index $item.Values $dailyIndex}}{{$item.Units}}</span
+            >
+        </span>
+        <!--  -->
+        {{end}}
+    </div>
+    <!--  -->
+    {{ end }}
+    <!--  -->
+</div>
+{{ end }}
+<!--  -->
