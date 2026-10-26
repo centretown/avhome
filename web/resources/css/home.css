@@ -120,6 +120,18 @@ body {
 .video {
     width: 100%;
 }
+
+.player-items {
+    width: 100%;
+}
+.player-item {
+    background-color: var(--bgFolder);
+    /*border-color: var(--fgSubFolder);*/
+    padding: 2px 4px 2px 4px;
+    width: 100%;
+    font-size: 1.5rem;
+}
+
 .mid-header,
 .sub-header {
     display: grid;

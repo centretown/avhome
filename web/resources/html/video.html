@@ -1,0 +1,54 @@
+{{ define "camera.video.player"}}
+<!---->
+<div>
+    <div class="player-items">
+        <input
+            id="{{.Name}}-player-time"
+            class="player-item"
+            type="datetime-local"
+            name="player-time"
+            value=""
+            min=""
+            max=""
+            step="900"
+            hx-put="/player/{{.Name}}"
+            hx-trigger="change"
+            hx-target="#{{.Name}}-player"
+            hx-swap="outerHTML"
+        />
+        <script>
+            addPlayerTime("{{.Name}}");
+        </script>
+    </div>
+    {{template "camera.video.source" .}}
+    <!---->
+</div>
+{{end}}
+<!---->
+{{ define "camera.video.source"}}
+<video
+    id="{{.Name}}-player"
+    src="{{.PlayerSource}}"
+    class="video"
+    controls
+    muted
+    playsinline
+></video>
+{{end}}
+<!---->
+
+{{ define "camera.video"}}
+<!---->
+<div>
+    <video
+        id="{{.Name}}-video"
+        class="video"
+        controls
+        muted
+        autoplay
+        playsinline
+    ></video>
+    <div id="{{.Name}}-message" class="message"></div>
+</div>
+{{end}}
+<!---->

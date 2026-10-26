@@ -14,23 +14,32 @@ type Runtime struct {
 	template *template.Template
 }
 
-func (webRun *Runtime) addCameraActions() {
+func (webRun *Runtime) addCameraSections() {
 	for _, p := range webRun.Paths.Items {
-		section := &section.Section{
+		item := &section.Section{
 			Name:   p.Name,
 			Icon:   "videocam",
 			Parent: "Cameras",
 		}
 		switch p.Name {
 		case "cam":
-			section.Title = "Front"
+			item.Title = "Front"
 		case "cam1":
-			section.Title = "West"
+			item.Title = "West"
 		case "cam4":
-			section.Title = "East"
+			item.Title = "East"
 		default:
-			section.Title = p.Name
+			item.Title = p.Name
 		}
-		webRun.Sections = append(webRun.Sections, section)
+		item.Sections = []*section.Section{
+			{
+				Name:   p.Name + "-player",
+				Title:  item.Title + " (recording)",
+				Icon:   "playlist_play",
+				Parent: "Cameras",
+			},
+		}
+		item.Title += " (live)"
+		webRun.Sections = append(webRun.Sections, item)
 	}
 }

@@ -2,50 +2,45 @@
 <!---->
 {{template "current.summary" .}}
 <!---->
-{{$content:=index .Paths.Items 1}}
-{{$section:=index $rt.Sections 1}}
+{{$content:=index .Paths.Items 1}} {{$section:=index $rt.Sections 1}}
 <div id="main-content" class="main-content">
     <div id="{{$section.Name}}" class="round">
         {{template "folder.header" $section}}
         <!---->
-        {{template "camera.video" $content}}
-        <!---->
+        <div id="{{$section.Name}}-fold">
+            {{template "camera.video" $content}}
+            <!---->
+            {{$sub0:=index $section.Sections 0}} {{template "mid.header" $sub0}}
+            <div id="{{$sub0.Name}}-fold" class="hide">
+                {{template "camera.video.player" $content}}
+            </div>
+        </div>
     </div>
 </div>
 
 <div id="side-list" class="side-list" style="height: getListHeight()">
     {{range $i, $camera := .Paths.Items}}
     <!---->
-    {{if (ne $i 1)}}
-    {{$section:=index $rt.Sections $i}}
+    {{if (ne $i 1)}} {{$section:=index $rt.Sections $i}}
     <div id="{{$section.Name}}" class="round">
         {{template "folder.header" $section}}
         <!---->
-        {{template "camera.video" $camera}}
-        <!---->
+        <div id="{{.Name}}-fold">
+            {{template "camera.video" $camera}}
+            <!---->
+            {{$sub0:=index $section.Sections 0}}
+            <!---->
+            {{template "mid.header" $sub0}}
+            <!---->
+            <div id="{{.Name}}-player-fold" class="hide">
+                {{template "camera.video.player" $camera}}
+            </div>
+        </div>
     </div>
-    {{end}}
-    {{end}}
+    {{end}} {{end}}
     <div id="weather" class="round">{{template "weather" .Weather}}</div>
 </div>
 <!---->
-{{end}}
-<!---->
-
-{{ define "camera.video"}}
-<!---->
-<div id="{{.Name}}-fold" class="folder-item">
-    <video
-        id="video-{{.Name}}"
-        class="video"
-        controls
-        muted
-        autoplay
-        playsinline
-    ></video>
-    <div id="message-{{.Name}}" class="message"></div>
-    <!---->
-</div>
 {{end}}
 <!---->
 <!---->
@@ -60,7 +55,7 @@
     >
     <span class="folder-text">{{.Title}}</span>
     <span
-        class="symbols folder-icon-right"
+        class="symbols"
         hx-on:click="swapContent('{{.Name}}');"
         hx-swap="none"
         >keyboard_arrow_right</span

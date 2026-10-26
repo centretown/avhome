@@ -47,8 +47,7 @@ func Run() {
 		return
 	}
 
-	// webRun.Sections = append(webRun.Sections, webRun.Weather.Sections...)
-	webRun.addCameraActions()
+	webRun.addCameraSections()
 	for _, a := range webRun.Sections {
 		log.Print(a)
 	}
@@ -58,6 +57,7 @@ func Run() {
 	defer sockServer.Done()
 
 	webRun.addHandlers(mux, sockServer)
+	handlePlayers(mux, sockServer, webRun.MtxUrl, webRun.Paths, webRun.template)
 	go serve(server)
 
 	const (
@@ -120,6 +120,7 @@ func (webRun *Runtime) addHandlers(mux *http.ServeMux, sockServer *socket.Server
 		// debugging purposes only
 		webRun.refreshTemplate()
 		mainTmpl := webRun.template.Lookup("main")
+		w.Header().Add("Cache-Control", "no-cache")
 		w.WriteHeader(http.StatusOK)
 		err := mainTmpl.Execute(w, webRun)
 		if err != nil {
@@ -131,7 +132,6 @@ func (webRun *Runtime) addHandlers(mux *http.ServeMux, sockServer *socket.Server
 		buf, _ := os.ReadFile("web/resources/favicon.ico")
 		w.Write(buf)
 	})
-
 }
 
 func (webRun *Runtime) poll(startMinute int, spanMinute int) {
@@ -214,27 +214,6 @@ func (webRun *Runtime) poll(startMinute int, spanMinute int) {
 		default:
 			time.Sleep(time.Millisecond * 10)
 		}
-	}
-}
-
-type Broadcaster interface {
-	Broadcast(string)
-}
-
-func broadcastLocation(location *weather.Location, t *template.Template, broadcaster Broadcaster) {
-	buf := bytes.Buffer{}
-	err := t.Execute(&buf, location)
-	if err != nil {
-		log.Printf("broadcastLocation: %v", err)
-		return
-	}
-	broadcaster.Broadcast(buf.String())
-}
-
-func broadcastLocations(locations []*weather.Location, t *template.Template, broadcaster Broadcaster) {
-	for _, location := range locations {
-		time.Sleep(time.Second)
-		broadcastLocation(location, t, broadcaster)
 	}
 }
 

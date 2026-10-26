@@ -10,11 +10,6 @@ type Limits struct {
 	Max float64
 }
 
-type ServiceError struct {
-	Reason string `json:"reason"`
-	Error  bool   `json:"error"`
-}
-
 type WeatherCommon struct {
 	Latitude             float64   `json:"latitude"`
 	Longitude            float64   `json:"longitude"`
