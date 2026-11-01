@@ -37,3 +37,5 @@ avhome
 database/location.db
 material/
 .scratch/
+archiver/archiver
+zoomer/zoomer

@@ -51,6 +51,9 @@ func GetMtxPaths(url string, user string, password string) (list *MtxPathList, e
 	log.Print(list.ItemCount)
 	for i, item := range list.Items {
 		var source string
+		if item.Source == nil {
+			continue
+		}
 		log.Printf("name: %s, available: %v, source: %v, type: %v",
 			item.Name, item.Available, item.Source.ID, item.Source.Type)
 		source, err = cameraSource(url, item.Name, time.Now().Add(time.Minute*-15))

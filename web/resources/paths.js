@@ -18,10 +18,10 @@ function addPath(path) {
     name: path.name,
     id: path.name + "-player",
     open: function () {
-      // let videoPlayer = document.getElementById(this.id);
-      // if (videoPlayer) {
-      //   videoPlayer.play();
-      // }
+      let videoPlayer = document.getElementById(this.id);
+      if (videoPlayer) {
+        videoPlayer.play();
+      }
       console.log("open-" + this.name);
     },
     close: function () {

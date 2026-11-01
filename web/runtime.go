@@ -21,25 +21,26 @@ func (webRun *Runtime) addCameraSections() {
 			Icon:   "videocam",
 			Parent: "Cameras",
 		}
+		title := ""
 		switch p.Name {
 		case "cam":
-			item.Title = "Front"
+			title = "Front"
 		case "cam1":
-			item.Title = "West"
+			title = "West"
 		case "cam4":
-			item.Title = "East"
+			title = "East"
 		default:
-			item.Title = p.Name
+			title = p.Name
 		}
+		item.Title = title + " (live)"
 		item.Sections = []*section.Section{
 			{
 				Name:   p.Name + "-player",
-				Title:  item.Title + " (recording)",
+				Title:  title + " (recording)",
 				Icon:   "playlist_play",
 				Parent: "Cameras",
 			},
 		}
-		item.Title += " (live)"
 		webRun.Sections = append(webRun.Sections, item)
 	}
 }

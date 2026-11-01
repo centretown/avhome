@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <script src="/reader.js"></script>
+        <style>
+            body {
+                background-color: black;
+            }
+            .video {
+                width: 100%;
+            }
+            .message {
+                color: orangered;
+            }
+            .group {
+            }
+            .hide {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="cam1-message" class="message"></div>
+        <div class="group">
+            <video
+                id="cam1-video"
+                class="video"
+                controls
+                muted
+                autoplay
+            ></video>
+        </div>
+        <canvas id="cam1-canvas" class="video"></canvas>
+        <script src="/home.js"></script>
+        <script src="/paths.js"></script>
+        <script>
+            window.addEventListener("load", () => {
+                loadPaths();
+            });
+            window.addEventListener("beforeunload", () => {
+                console.log("closing readers...");
+                for (let reader of readers) {
+                    if (reader !== null) {
+                        console.log("closing: ", reader.url);
+                        reader.close();
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>
+<!---->
