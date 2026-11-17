@@ -9,7 +9,12 @@
                 background-color: black;
             }
             .video {
-                width: 100%;
+                position: fixed;
+                left: 1px;
+                top: 1px;
+                width: 540px;
+            }
+            .canvas {
             }
             .message {
                 color: orangered;
@@ -22,17 +27,17 @@
         </style>
     </head>
     <body>
-        <div id="cam1-message" class="message"></div>
+        <div id="cam5-message" class="message"></div>
         <div class="group">
             <video
-                id="cam1-video"
+                id="cam5-video"
                 class="video"
                 controls
                 muted
                 autoplay
             ></video>
+            <canvas id="cam5-canvas" class="canvas" width="2560" height="1440"></canvas>
         </div>
-        <canvas id="cam1-canvas" class="video"></canvas>
         <script src="/home.js"></script>
         <script src="/paths.js"></script>
         <script>

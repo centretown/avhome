@@ -39,25 +39,40 @@ func QueryAndDecode(query string, w any) (err error) {
 	return
 }
 
-func ReadAndDecode(r io.ReadCloser, w any) error {
-	buf, err := io.ReadAll(r)
+func CheckServiceError(buf []byte) error {
+	var serviceError ServiceError
+	json.Unmarshal(buf, &serviceError)
+	if serviceError.Error {
+		// {"reason":"The service is overloaded","error":true}
+		return fmt.Errorf("service error:'%v' '%s'",
+			serviceError.Error, serviceError.Reason)
+	}
+	return nil
+}
+
+func ReadAndDecode(r io.ReadCloser, w any) (err error) {
+	var buf []byte
+	defer func() {
+		if err != nil {
+			log.Printf("ReadAndDecode error '%v'", err)
+		}
+	}()
+
+	buf, err = io.ReadAll(r)
 	if err != nil {
-		return fmt.Errorf("io.ReadAll: %v", err)
+		return
 	}
 
-	if len(buf) < 100 {
-		e := &ServiceError{}
-		log.Print(string(buf))
-		json.Unmarshal(buf, e)
-		// {"reason":"The service is overloaded","error":true}
-		return fmt.Errorf("readAndDecode: small buffer returned.\n\t"+
-			"Reason: %s, Error:%v", e.Reason, e.Error)
+	err = CheckServiceError(buf)
+	if err != nil {
+		return
 	}
 
 	err = json.Unmarshal(buf, w)
 	if err != nil {
 		log.Print(string(buf))
-		return fmt.Errorf("json.Unmarshal: %v\n%v", err, string(buf))
+		return
 	}
+
 	return nil
 }

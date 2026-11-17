@@ -4,7 +4,7 @@ const mtx_players = new Map();
 
 mtx_paths.push({
   host: "10.0.0.7",
-  name: "cam1",
+  name: "cam5",
   start: "2026-10-17T14:48:46+00:00",
   end: "2026-10-17T14:48:46+00:00",
   duration: 60,
@@ -138,8 +138,8 @@ let processor = {
   },
 
   doLoad: function () {
-    this.video = document.getElementById("cam1-video");
-    this.zoom = document.getElementById("cam1-canvas");
+    this.video = document.getElementById("cam5-video");
+    this.zoom = document.getElementById("cam5-canvas");
     this.ctxZoom = this.zoom.getContext("2d");
 
     this.width = 0;
@@ -162,42 +162,47 @@ let processor = {
       },
       false,
     );
+    self.video.addEventListener("mousedown", (event) => {
+      event.preventDefault();
+      console.log("mousedown", event.layerX, event.layerY);
+    });
     self.video.addEventListener("wheel", (event) => {
       event.preventDefault();
-      this.scale += event.deltaY * -0.005;
-      this.scale = Math.min(Math.max(1, this.scale), 8);
+      event.stopImmediatePropagation();
+      this.scale += event.deltaY * -0.008333333;
+      this.scale = Math.min(Math.max(1, this.scale), 16);
       console.log(this.scale);
     });
-    self.video.addEventListener("mousemove", () => {
+    self.video.addEventListener("mousemove", (event) => {
       self.mouseX = Math.floor(
         (event.layerX * self.width) / self.video.offsetWidth,
       );
       self.mouseY = Math.floor(
-        (event.clientY * self.height) / self.video.offsetHeight,
-      );
-      console.log(
-        self.mouseX,
-        self.mouseY,
-        self.video.offsetWidth,
-        self.video.offsetHeight,
+        (event.layerY * self.height) / self.video.offsetHeight,
       );
     });
   },
 
   computeFrame: function () {
-    const sx = this.mouseX;
-    const sy = this.mouseY;
+    const width = this.width / this.scale;
+    const height = this.height / this.scale;
+    let sx = this.mouseX - width / 2;
+    let sy = this.mouseY - height / 2;
+    sx = Math.min(Math.max(0, sx), this.width - width);
+    sy = Math.min(Math.max(0, sy), this.height - height);
     // this.ctxZoom.drawImage(this.video, start, 0, this.width, this.height);
+    // this.ctxZoom.imageSmoothingEnabled = true;
+    // this.ctxZoom.imageSmoothingQuality = "low";
     this.ctxZoom.drawImage(
       this.video,
       sx,
       sy,
-      this.width,
-      this.height,
+      this.width / this.scale,
+      this.height / this.scale,
       0,
       0,
-      this.width,
-      this.height,
+      this.zoom.width,
+      this.zoom.height,
     );
     return;
   },

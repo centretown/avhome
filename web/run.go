@@ -25,50 +25,6 @@ var (
 	}
 )
 
-func Run() {
-	var err error
-
-	webRun.Paths, err = GetMtxPaths(webRun.MtxUrl, "dave", "football")
-	if err != nil {
-		log.Printf("failed to contact Mtx: %v\n", err)
-		return
-	}
-
-	webRun.Weather = weather.NewRuntime()
-	err = webRun.Weather.Connect("database/location.db")
-	if err != nil {
-		log.Printf("failed to connect weather database: %v\n", err)
-		return
-	}
-	defer webRun.Weather.Done()
-	err = webRun.Weather.LoadLocations()
-	if err != nil {
-		log.Printf("failed to load weather locations: %v\n", err)
-		return
-	}
-
-	webRun.addCameraSections()
-	for _, a := range webRun.Sections {
-		log.Print(a)
-	}
-
-	sockServer = socket.NewServer()
-	sockServer.Run()
-	defer sockServer.Done()
-
-	webRun.addHandlers(mux, sockServer)
-	handlePlayers(mux, sockServer, webRun.MtxUrl, webRun.Paths, webRun.template)
-	go serve(server)
-
-	const (
-		startMinute = 4  // 4 minutes after the hour
-		spanMinute  = 15 // every 15 minutes
-	)
-	// webRun.r
-	webRun.poll(startMinute, spanMinute)
-
-}
-
 func serve(server *http.Server) {
 	err := server.ListenAndServe()
 	if err != nil {
@@ -221,4 +177,56 @@ var funcMap = template.FuncMap{
 	"sub": func(i int, j int) int {
 		return i - j
 	},
+}
+
+func Run() {
+	var (
+		err    error
+		ticker = time.NewTicker(10 * time.Second)
+	)
+
+	for i := 1; ; i++ {
+		log.Printf("attempt %d: connecting to %s...", i, webRun.MtxUrl)
+		webRun.Paths, err = GetMtxPaths(webRun.MtxUrl, "dave", "football")
+		if err != nil {
+			log.Printf("failed to connect to %s: %v\n", webRun.MtxUrl, err)
+			<-ticker.C
+			continue
+		}
+		ticker.Stop()
+		break
+	}
+
+	webRun.Weather = weather.NewRuntime()
+	err = webRun.Weather.Connect("database/location.db")
+	if err != nil {
+		log.Printf("failed to connect weather database: %v\n", err)
+		return
+	}
+	defer webRun.Weather.Done()
+	err = webRun.Weather.LoadLocations()
+	if err != nil {
+		log.Printf("failed to load weather locations: %v\n", err)
+		return
+	}
+
+	webRun.addCameraSections()
+	for _, a := range webRun.Sections {
+		log.Print(a)
+	}
+
+	sockServer = socket.NewServer()
+	sockServer.Run()
+	defer sockServer.Done()
+
+	webRun.addHandlers(mux, sockServer)
+	handlePlayers(mux, sockServer, webRun.MtxUrl, webRun.Paths, webRun.template)
+	go serve(server)
+
+	const (
+		startMinute = 4  // 4 minutes after the hour
+		spanMinute  = 15 // every 15 minutes
+	)
+	webRun.poll(startMinute, spanMinute)
+
 }
